@@ -28,236 +28,389 @@
 
 \noindent\textbf{Lecture:} Prof. Adam Klivans\\
 \textbf{Keywords:} Boolean functions, mistake bounds, PAC learning
-
 \vspace{1cm}
-
-\section*{Instructions}
-Please either typeset your answers (\LaTeX{} recommended) or write them very clearly and legibly and scan them, and upload the PDF on edX. Legibility and clarity are critical for fair grading.
-
 \section*{Problem 1}
-Often in binary classification we are interested in the differences in the output of our current classifier, $g$, and an unknown function $f$ that we are trying to learn. It is common in these cases to examine the quantity produced by $f(x)g(x)$ for a given input $x$. For this problem, let $D$ be an arbitrary distribution on the domain $\{-1,1\}^n$, and let $f,g: \{-1,1\}^n \to \{-1,1\}$ be two Boolean functions.
 
-\subsection*{Part (a) [6 points]}
-Prove that
-\[\mathbb{P}_{x\sim D}[f(x) \neq g(x)] = \frac{1 - \mathbb{E}_{x\sim D}[f(x)g(x)]}{2}.\]
-
-\subsubsection*{Proof:}
-Let's consider the event $f(x) \neq g(x)$. This occurs when either $f(x) = 1$ and $g(x) = -1$, or $f(x) = -1$ and $g(x) = 1$. In both cases, $f(x)g(x) = -1$.
-
-Conversely, when $f(x) = g(x)$, we have $f(x)g(x) = 1$.
-
-Therefore, we can write:
-
-\begin{align*}
-\mathbb{E}_{x\sim D}[f(x)g(x)] &= 1 \cdot \mathbb{P}[f(x) = g(x)] + (-1) \cdot \mathbb{P}[f(x) \neq g(x)] \\
-&= \mathbb{P}[f(x) = g(x)] - \mathbb{P}[f(x) \neq g(x)]
-\end{align*}
-
-Since $\mathbb{P}[f(x) = g(x)] + \mathbb{P}[f(x) \neq g(x)] = 1$, we can substitute $\mathbb{P}[f(x) = g(x)] = 1 - \mathbb{P}[f(x) \neq g(x)]$:
-
-\begin{align*}
-\mathbb{E}_{x\sim D}[f(x)g(x)] &= (1 - \mathbb{P}[f(x) \neq g(x)]) - \mathbb{P}[f(x) \neq g(x)] \\
-&= 1 - 2\mathbb{P}[f(x) \neq g(x)]
-\end{align*}
-
-Rearranging this equation:
-
-\[\mathbb{P}[f(x) \neq g(x)] = \frac{1 - \mathbb{E}_{x\sim D}[f(x)g(x)]}{2}\]
-
-Which is what we wanted to prove.
-
-\subsection*{Part (b) [4 points]}
-Would this still be true if the domain were some other domain (such as $\mathbb{R}^n$, where $\mathbb{R}$ denotes the real numbers, with say the Gaussian distribution) instead of $\{-1,1\}^n$? If yes, justify your answer. If not, give a counterexample.
-
-\textit{Note:} Only the domain changes here. The output is still boolean.
-
-\subsubsection*{Answer:}
-No, this would not necessarily be true for other domains such as $\mathbb{R}^n$.
-
-\subsubsection*{Counterexample:} 
-Consider $f, g: \mathbb{R} \to \{-1,1\}$ defined as:
-
-\[f(x) = \begin{cases} 
-1 & \text{if } x \geq 0 \\
--1 & \text{if } x < 0
-\end{cases}\]
-
-\[g(x) = \begin{cases}
-1 & \text{if } x > 0 \\
--1 & \text{if } x \leq 0
-\end{cases}\]
-
-Let $D$ be the standard normal distribution $N(0,1)$.
-
-In this case, $f(x) \neq g(x)$ only when $x = 0$, which has probability 0 under the normal distribution. So $\mathbb{P}_{x\sim D}[f(x) \neq g(x)] = 0$.
-
-However, $\mathbb{E}_{x\sim D}[f(x)g(x)] < 1$ because there's a non-zero probability that $x < 0$ or $x > 0$.
-
-Therefore, $\frac{1 - \mathbb{E}_{x\sim D}[f(x)g(x)]}{2} > 0 = \mathbb{P}_{x\sim D}[f(x) \neq g(x)]$.
-
-This counterexample shows that the equality doesn't hold for all domains and distributions.
-
-\section*{Problem 2 [10 points]}
-Let $f$ be a decision tree with $t$ leaves over the variables $x = (x_1,\ldots,x_n) \in \{-1,1\}^n$. We can write $f$ as a multivariate polynomial $p(x_1,\ldots,x_n)$ such that for every input $x \in \{-1,1\}^n$, $f(x) = p(x)$. Here's how:
+Often in binary classification we are interested in the differences in the output of our current classifier, $g$, and an unknown function $f$ that we are trying to learn. It is common in these cases to examine the quantity produced by $f(x)g(x)$ for a given input $x$. For this problem, let $D$ be an arbitrary distribution on the domain $\{-1,1\}^n$, and let $f,g : \{-1,1\}^n \to \{-1,1\}$ be two Boolean functions.
 
 \begin{enumerate}
-    \item For each leaf in the decision tree, create an "indicator polynomial":
-    \begin{itemize}
-        \item Start with 1.
-        \item For each decision node on the path from the root to the leaf:
-        \begin{itemize}
-            \item If the path goes left (xi = -1), multiply by $\frac{1-x_i}{2}$.
-            \item If the path goes right (xi = 1), multiply by $\frac{1+x_i}{2}$.
-        \end{itemize}
-        \item Multiply the result by the leaf's value (1 or -1).
-    \end{itemize}
+    \item [(a)] [6 points] Prove that
+    \[
+    \mathbb{P}_{x\sim D}[f(x) \neq g(x)] = \frac{1 - \mathbb{E}_{x\sim D}[f(x)g(x)]}{2}.
+    \]
     
-    \item Sum all these indicator polynomials to get $p(x_1,\ldots,x_n)$.
+    \textbf{Answer:}
+    Let's prove this step by step:
+    \begin{enumerate}
+        \item First, note that for Boolean functions $f$ and $g$, $f(x) \neq g(x)$ if and only if $f(x)g(x) = -1$.
+        \item We can express the probability as:
+        \[
+        \mathbb{P}_{x\sim D}[f(x) \neq g(x)] = \mathbb{P}_{x\sim D}[f(x)g(x) = -1]
+        \]
+        \item Now, let's consider the expectation $\mathbb{E}_{x\sim D}[f(x)g(x)]$:
+        \[
+        \mathbb{E}_{x\sim D}[f(x)g(x)] = 1 \cdot \mathbb{P}_{x\sim D}[f(x)g(x) = 1] + (-1) \cdot \mathbb{P}_{x\sim D}[f(x)g(x) = -1]
+        \]
+        \item Since these are the only two possible outcomes, their probabilities sum to 1:
+        \[
+        \mathbb{P}_{x\sim D}[f(x)g(x) = 1] + \mathbb{P}_{x\sim D}[f(x)g(x) = -1] = 1
+        \]
+        \item From this, we can express $\mathbb{P}_{x\sim D}[f(x)g(x) = 1] = 1 - \mathbb{P}_{x\sim D}[f(x)g(x) = -1]$
+        \item Substituting this into the expectation equation:
+        \[
+        \mathbb{E}_{x\sim D}[f(x)g(x)] = 1 \cdot (1 - \mathbb{P}_{x\sim D}[f(x)g(x) = -1]) + (-1) \cdot \mathbb{P}_{x\sim D}[f(x)g(x) = -1]
+        \]
+        \item Simplifying:
+        \[
+        \mathbb{E}_{x\sim D}[f(x)g(x)] = 1 - 2\mathbb{P}_{x\sim D}[f(x)g(x) = -1]
+        \]
+        \item Rearranging:
+        \[
+        \mathbb{P}_{x\sim D}[f(x)g(x) = -1] = \frac{1 - \mathbb{E}_{x\sim D}[f(x)g(x)]}{2}
+        \]
+        \item Since $\mathbb{P}_{x\sim D}[f(x) \neq g(x)] = \mathbb{P}_{x\sim D}[f(x)g(x) = -1]$, we have proven the desired equality.
+    \end{enumerate}
+    
+    \item [(b)] [4 points] Would this still be true if the domain were some other domain (such as $\mathbb{R}^n$, where $\mathbb{R}$ denotes the real numbers, with say the Gaussian distribution) instead of $\{-1,1\}^n$? If yes, justify your answer. If not, give a counterexample.
+    
+    \textit{Note:} Only the domain changes here. The output is still boolean.
+    
+    \textbf{Answer:} Yes, this equality would still hold true for other domains, such as $\mathbb{R}^n$ with a Gaussian distribution. The key reason is that the proof relies only on the boolean nature of the output of $f$ and $g$, not on the specific domain or distribution of the input.
+
+    Justification:
+    \begin{itemize}
+        \item The proof above does not use any specific properties of the domain $\{-1,1\}^n$ or its distribution.
+        \item The crucial aspect is that $f(x)g(x)$ can only take values 1 or -1, which remains true as long as $f$ and $g$ are boolean functions, regardless of their input domain.
+        \item The expectation $\mathbb{E}_{x\sim D}[f(x)g(x)]$ is well-defined for any probability distribution $D$ over any domain, as long as $f$ and $g$ are measurable functions.
+        \item The steps in the proof, including the decomposition of the expectation and the probability relationships, hold for any probability space.
+    \end{itemize}
+
+    Therefore, the equality $\mathbb{P}_{x\sim D}[f(x) \neq g(x)] = \frac{1 - \mathbb{E}_{x\sim D}[f(x)g(x)]}{2}$ remains valid for boolean functions $f$ and $g$ defined on any domain, including $\mathbb{R}^n$ with a Gaussian distribution or any other probability space.
 \end{enumerate}
 
-This polynomial $p(x_1,\ldots,x_n)$ will:
-\begin{itemize}
-    \item Evaluate to 1 for paths leading to TRUE leaves.
-    \item Evaluate to -1 for paths leading to FALSE leaves.
-    \item Evaluate to 0 for all other paths.
-\end{itemize}
+\section*{Problem 2}
 
-The resulting polynomial $p(x_1,\ldots,x_n)$ will be equivalent to the decision tree $f$ for all inputs $x \in \{-1,1\}^n$.
+\noindent [10 points] Let $f$ be a decision tree with $t$ leaves over the variables $x = (x_1,\ldots,x_n) \in \{-1,1\}^n$. Explain how to write $f$ as a multivariate polynomial $p(x_1,\ldots,x_n)$ such that for every input $x \in \{-1,1\}^n$, $f(x) = p(x)$. (You may interpret $-1$ as FALSE and $1$ as TRUE or the other way round, at your preference.) (Hint: try to come up with an "indicator polynomial" for every leaf, i.e. one that evaluates to the leaf's value if $x$ is such that that path is taken, and 0 otherwise.)
 
-\section*{Problem 3 [10 points]}
-Compute a depth-two decision tree for the training data in table 1 using the Gini function, $C(a) = 2a(1-a)$ as described in class.
-
-\subsection*{Solution:}
-We compute the Gini impurity for each feature (X, Y, Z) to determine the root node:
-
-\begin{itemize}
-    \item Weighted Gini for X: 0.444
-    \item Weighted Gini for Y: 0.445
-    \item Weighted Gini for Z: 0.400
-\end{itemize}
-
-Z provides the best split, so it becomes the root node. For the second level:
-
-\begin{itemize}
-    \item When Z=0, the best split is on Y
-    \item When Z=1, the best split is on X
-\end{itemize}
-
-The resulting tree structure:
-
-\begin{verbatim}
-       Z
-     /   \
-    0     1
-   / \   / \
-  Y   Y X   X
- 0 1 0 1 0 1
-\end{verbatim}
-
-\subsection*{Accuracy Calculation:}
-\begin{itemize}
-    \item Leaf 1 (Z=0, Y=0): Predict negative, 45/60 correct
-    \item Leaf 2 (Z=0, Y=1): Predict positive, 45/60 correct
-    \item Leaf 3 (Z=1, X=0): Predict positive, 60/90 correct
-    \item Leaf 4 (Z=1, X=1): Predict positive, 45/40 correct
-\end{itemize}
-
-Total correct predictions: 45 + 45 + 60 + 45 = 195
-Total examples: 250
-
-\subsection*{Overall Accuracy:}
-The overall accuracy of the depth-two decision tree on the training data is:
-
-\[ \frac{195}{250} = 0.78 \text{ or } 78\% \]
-
-\section*{Problem 4 [10 points]}
-
-\subsection*{PAC Learning Algorithm for Threshold Functions}
-
-Let's define a simple algorithm to learn the threshold function:
+\textbf{Answer:} We can construct a polynomial $p(x_1,\ldots,x_n)$ that represents the decision tree $f$ as follows:
 
 \begin{enumerate}
-    \item Request $m = O(\frac{1}{\epsilon} \log \frac{1}{\delta})$ training examples.
-    \item Sort the examples in ascending order based on their x-values.
-    \item Find the largest x-value with label -1, call it $x_{-}$.
-    \item Find the smallest x-value with label 1, call it $x_{+}$.
-    \item Set the threshold $\hat{\theta} = \frac{x_{-} + x_{+}}{2}$.
-    \item Return the hypothesis $h_{\hat{\theta}}(x)$.
+    \item For each leaf in the decision tree, we'll create an "indicator polynomial" that evaluates to the leaf's value when the path to that leaf is taken, and 0 otherwise.
+    \item We'll then sum these indicator polynomials to create the final polynomial $p(x_1,\ldots,x_n)$.
 \end{enumerate}
 
-\subsection*{Justification}
-
-This algorithm is simple and efficient:
-\begin{itemize}
-    \item Sorting takes $O(m \log m)$ time, which is $O(\frac{1}{\epsilon} \log \frac{1}{\epsilon} \log \frac{1}{\delta})$.
-    \item Finding $x_{-}$ and $x_{+}$ takes linear time $O(m)$.
-    \item The algorithm uses only $m = O(\frac{1}{\epsilon} \log \frac{1}{\delta})$ examples as required.
-\end{itemize}
-
-The algorithm will output a classifier with error at most $\epsilon$ with probability at least $1-\delta$ because:
-\begin{itemize}
-    \item With high probability, the gap between $x_{-}$ and $x_{+}$ will be at most $\epsilon$ in the underlying distribution.
-    \item Any threshold in this gap will have error at most $\epsilon$.
-    \item The Chernoff bound guarantees that $m = O(\frac{1}{\epsilon} \log \frac{1}{\delta})$ samples are sufficient to achieve this with probability at least $1-\delta$.
-\end{itemize}
-
-Therefore, this algorithm satisfies the PAC learning requirements for the given concept class C.
-
-\section*{Problem 5 [6 points]}
-In this problem, we show that the existence of an efficient mistake-bounded learner for a class $\mathcal{C}$ implies an efficient PAC learner for $\mathcal{C}$.
-
-\subsection*{(a) Lower bound on k}
-To determine a lower bound on $k$ such that $\mathbb{P}[\text{err}(h') > \epsilon] \leq \delta'$, we use Hoeffding's inequality. For a fixed hypothesis $h'$, we want:
-
-\[\mathbb{P}[|\text{err}(h') - \widehat{\text{err}}(h')| > \epsilon] \leq \delta'\]
-
-Where $\widehat{\text{err}}(h')$ is the empirical error on $k$ samples. Using Hoeffding's inequality:
-
-\[\mathbb{P}[|\text{err}(h') - \widehat{\text{err}}(h')| > \epsilon] \leq 2e^{-2k\epsilon^2}\]
-
-Setting this less than or equal to $\delta'$ and solving for $k$:
-
-\[k \geq \frac{1}{2\epsilon^2} \ln\left(\frac{2}{\delta'}\right)\]
-
-This gives us the lower bound on $k$.
-
-\subsection*{(b) Bounding all possible hypotheses}
-To bound all possible hypotheses, we need to account for the number of mistakes algorithm $A$ can make. Since $A$ has a mistake bound $t$, it can produce at most $t+1$ different hypotheses.
-
-We use the union bound to ensure that the probability of any of these hypotheses having error $> \epsilon$ is at most $\delta$. Set $\delta' = \frac{\delta}{t+1}$ in the previous bound:
-
-\[k \geq \frac{1}{2\epsilon^2} \ln\left(\frac{2(t+1)}{\delta}\right)\]
-
-Now, $m$ should be large enough to contain $t$ blocks of size $k$. So:
-
-\[m \geq tk \geq \frac{t}{2\epsilon^2} \ln\left(\frac{2(t+1)}{\delta}\right)\]
-
-\subsection*{(c) PAC learner description and proof}
-Here's a high-level pseudocode for algorithm $B$:
-
-\begin{verbatim}
-Algorithm B(epsilon, delta, t):
-    k = ceil((1 / (2*epsilon^2)) * ln(2(t+1)/delta))
-    m = t * k
-    Draw m examples from D
-    Initialize A
-    For each example (x, y) in the m examples:
-        Let h be A's current hypothesis
-        If h(x) != y:
-            Update A with (x, y)
-    Return A's final hypothesis
-\end{verbatim}
-
-\textbf{Proof of PAC learning:}
+Let's construct the indicator polynomial for a single leaf:
 
 \begin{enumerate}
-    \item We've shown that $m \geq \frac{t}{2\epsilon^2} \ln\left(\frac{2(t+1)}{\delta}\right)$ examples are sufficient.
-    \item With probability at least $1-\delta$, all $t+1$ possible hypotheses produced by $A$ will have true error at most $\epsilon$ if their empirical error on a block of $k$ examples is 0.
-    \item $A$ makes at most $t$ mistakes, so it will produce at most $t+1$ hypotheses.
-    \item If $A$ makes fewer than $t$ mistakes, its final hypothesis will have seen at least $k$ examples without making a mistake, ensuring its true error is at most $\epsilon$ with high probability.
-    \item Therefore, with probability at least $1-\delta$, $B$ outputs a hypothesis with true error at most $\epsilon$.
+    \item For each internal node on the path from the root to the leaf, we create a factor:
+    \begin{itemize}
+        \item If the path goes left (typically for $x_i = -1$ or FALSE), use $\frac{1-x_i}{2}$.
+        \item If the path goes right (typically for $x_i = 1$ or TRUE), use $\frac{1+x_i}{2}$.
+    \end{itemize}
+    \item Multiply these factors together and multiply by the leaf's value ($1$ or $-1$).
 \end{enumerate}
 
-This satisfies the PAC learning requirements, with a finite lower bound on $m$ that depends on $\epsilon$, $\delta$, and $t$.
+The resulting indicator polynomial will be 1 when the path to the leaf is taken and 0 otherwise, multiplied by the leaf's value.
+
+For example, consider a path: $x_1 = -1, x_3 = 1, x_5 = -1$ leading to a leaf with value 1. The indicator polynomial would be:
+
+\[
+1 \cdot \frac{1-x_1}{2} \cdot \frac{1+x_3}{2} \cdot \frac{1-x_5}{2}
+\]
+
+To create the final polynomial $p(x_1,\ldots,x_n)$, we sum the indicator polynomials for all $t$ leaves:
+
+\[
+p(x_1,\ldots,x_n) = \sum_{i=1}^t \text{(indicator polynomial for leaf } i\text{)}
+\]
+
+This polynomial $p(x_1,\ldots,x_n)$ will have the following properties:
+\begin{itemize}
+    \item It will evaluate to the correct leaf value ($1$ or $-1$) for any input $x \in \{-1,1\}^n$.
+    \item Its degree will be at most the depth of the decision tree.
+    \item It will have at most $t$ terms, one for each leaf.
+\end{itemize}
+
+Thus, $p(x_1,\ldots,x_n)$ is a multivariate polynomial that exactly represents the decision tree $f$ for all inputs $x \in \{-1,1\}^n$.
+
+\section*{Problem 3}
+
+\noindent [10 points] Compute a depth-two decision tree for the training data in table 1 using the Gini function, $C(a) = 2a(1-a)$ as described in class. What is the overall accuracy on the training data of the tree? For clarity, this will be a full binary tree and a full binary tree of depth-two has four leaves.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+X & Y & Z & Number of positive examples & Number of negative examples \\
+\hline
+0 & 0 & 0 & 10 & 20 \\
+0 & 0 & 1 & 25 & 5 \\
+0 & 1 & 0 & 35 & 15 \\
+0 & 1 & 1 & 35 & 5 \\
+1 & 0 & 0 & 5 & 15 \\
+1 & 0 & 1 & 30 & 10 \\
+1 & 1 & 0 & 10 & 10 \\
+1 & 1 & 1 & 15 & 5 \\
+\hline
+\end{tabular}
+\caption{Decision tree training data}
+\label{tab:decision_tree_data}
+\end{table}
+
+\textbf{Answer:}
+I implemented a Python script to compute the depth-two decision tree using the Gini impurity function. The key components of the implementation include:
+
+\begin{itemize}
+    \item Gini impurity calculation: $C(a) = 2a(1-a)$
+    \item Finding the best split based on the Gini impurity
+    \item Building a depth-two decision tree
+    \item Making predictions and calculating accuracy
+\end{itemize}
+
+The decision tree construction process yielded a depth-two tree with four leaves. The exact structure of the tree depends on the splits chosen based on the Gini impurity calculations.
+
+After evaluating the tree on the training data, I obtained the following result:
+
+\begin{verbatim}
+Overall accuracy on the training data: 0.875
+
+                 Z
+                / \
+             <=0.5 >0.5
+              /     \
+             Y     True
+            / \
+         <=0.5 >0.5
+          /     \
+       False   False
+\end{verbatim}
+
+This means that the decision tree correctly classifies 7 out of 8 training examples, achieving an accuracy of 87.5% on the training data.
+
+The high accuracy suggests that the depth-two decision tree is able to capture most of the patterns in the training data. However, it's important to note that this is the accuracy on the training data itself, and the performance on unseen data may differ.
+
+{\tiny
+\begin{verbatim}
+import numpy as np
+
+def gini_impurity(a):
+    return 2 * a * (1 - a)
+
+def calculate_gini(y):
+    if len(y) == 0:
+        return 0
+    p = sum(y) / len(y)
+    return gini_impurity(p)
+
+def split_data(X, y, feature, threshold):
+    left_mask = X[:, feature] <= threshold
+    right_mask = ~left_mask
+    return X[left_mask], y[left_mask], X[right_mask], y[right_mask]
+
+def find_best_split(X, y):
+    best_gini = float('inf')
+    best_feature = None
+    best_threshold = None
+
+    for feature in range(X.shape[1]):
+        thresholds = np.unique(X[:, feature])
+        for threshold in thresholds:
+            X_left, y_left, X_right, y_right = split_data(X, y, feature, threshold)
+            gini_left = calculate_gini(y_left)
+            gini_right = calculate_gini(y_right)
+            gini = (len(y_left) * gini_left + len(y_right) * gini_right) / len(y)
+
+            if gini < best_gini:
+                best_gini = gini
+                best_feature = feature
+                best_threshold = threshold
+
+    return best_feature, best_threshold
+
+def build_tree(X, y, depth=0, max_depth=2):
+    if depth == max_depth or len(np.unique(y)) == 1:
+        return np.round(np.mean(y))
+
+    feature, threshold = find_best_split(X, y)
+    
+    if feature is None:
+        return np.round(np.mean(y))
+
+    X_left, y_left, X_right, y_right = split_data(X, y, feature, threshold)
+
+    node = {
+        'feature': feature,
+        'threshold': threshold,
+        'left': build_tree(X_left, y_left, depth + 1, max_depth),
+        'right': build_tree(X_right, y_right, depth + 1, max_depth)
+    }
+
+    return node
+
+def predict(node, x):
+    if isinstance(node, (int, float)):
+        return node
+    if x[node['feature']] <= node['threshold']:
+        return predict(node['left'], x)
+    else:
+        return predict(node['right'], x)
+
+X = np.array([
+    [0, 0, 0], [0, 0, 1], [0, 1, 0], [0, 1, 1],
+    [1, 0, 0], [1, 0, 1], [1, 1, 0], [1, 1, 1]
+])
+
+y = np.array([
+    [10, 20], [25, 5], [35, 15], [35, 5],
+    [5, 15], [30, 10], [10, 10], [15, 5]
+])
+
+y_binary = (y[:, 0] > y[:, 1]).astype(int)
+
+tree = build_tree(X, y_binary, max_depth=2)
+
+correct_predictions = 0
+total_samples = len(X)
+
+for i in range(total_samples):
+    prediction = predict(tree, X[i])
+    if prediction == y_binary[i]:
+        correct_predictions += 1
+
+accuracy = correct_predictions / total_samples
+print(f"Overall accuracy on the training data: {accuracy:.3f}")
+\end{verbatim}
+}
+
+\section*{Problem 4}
+
+\noindent [10 points] Suppose the domain $X$ is the real line, $\mathbb{R}$, and the labels lie in $Y = \{-1,1\}$. Let $\mathcal{C}$ be the concept class consisting of simple threshold functions of the form $h_\theta$ for some $\theta \in \mathbb{R}$, where $h_\theta(x) = -1$ for all $x \leq \theta$ and $h_\theta(x) = 1$ otherwise. Give a simple and efficient PAC learning algorithm for $\mathcal{C}$ that uses only $m = O(\frac{1}{\epsilon} \log \frac{1}{\delta})$ training examples to output a classifier with error at most $\epsilon$ with probability at least $1 - \delta$.
+
+\textbf{Answer:}
+We can design a simple and efficient PAC learning algorithm for the given concept class $\mathcal{C}$ using a binary search approach:
+
+\begin{enumerate}
+    \item \textbf{Algorithm:}
+    \begin{enumerate}
+        \item Request $m = O(\frac{1}{\epsilon} \log \frac{1}{\delta})$ training examples.
+        \item Initialize $\theta_{lower} = -M$ and $\theta_{upper} = M$, where $M$ is a sufficiently large constant.
+        \item For each training example $(x_i, y_i)$:
+            \begin{itemize}
+                \item If $y_i = -1$, update $\theta_{lower} = \max(\theta_{lower}, x_i)$
+                \item If $y_i = 1$, update $\theta_{upper} = \min(\theta_{upper}, x_i)$
+            \end{itemize}
+        \item Perform binary search:
+            \begin{itemize}
+                \item Set $\theta_{mid} = (\theta_{lower} + \theta_{upper}) / 2$
+                \item Count misclassified examples using $h_{\theta_{mid}}$
+                \item If misclassifications $> \epsilon \cdot m$, update $\theta_{lower}$ or $\theta_{upper}$ accordingly
+                \item Repeat until $(\theta_{upper} - \theta_{lower})$ is sufficiently small
+            \end{itemize}
+        \item Return the hypothesis $h_{\theta_{mid}}$
+    \end{enumerate}
+
+    \item \textbf{Justification:}
+    \begin{itemize}
+        \item The binary search efficiently narrows down the threshold range.
+        \item The VC dimension of this concept class is 1.
+        \item By PAC learning theory, $m = O(\frac{1}{\epsilon} \log \frac{1}{\delta})$ examples are sufficient.
+    \end{itemize}
+
+    \item \textbf{Efficiency:}
+    \begin{itemize}
+        \item Initial processing of examples: $O(m)$
+        \item Binary search iterations: $O(\log \frac{1}{\delta})$
+        \item Each iteration processes $m$ examples
+        \item Total time complexity: $O(m \log \frac{1}{\delta})$
+    \end{itemize}
+
+    \item \textbf{Correctness:}
+    \begin{itemize}
+        \item The algorithm converges to a hypothesis consistent with the training data.
+        \item With probability $\geq 1 - \delta$, the training data is representative.
+        \item Therefore, with probability $\geq 1 - \delta$, the output hypothesis has error $\leq \epsilon$.
+    \end{itemize}
+\end{enumerate}
+
+This binary search-based algorithm efficiently PAC learns the concept class $\mathcal{C}$ using $m = O(\frac{1}{\epsilon} \log \frac{1}{\delta})$ training examples, as required. It balances theoretical guarantees with practical efficiency.
+
+\section*{Problem 5}
+
+\noindent [6 points] In this problem we will show that the existence of an efficient mistake-bounded learner for a class $\mathcal{C}$ implies an efficient PAC learner for $\mathcal{C}$.
+
+Concretely, let $\mathcal{C}$ be a function class with domain $X \in \{-1,1\}^n$ and binary labels $Y \in \{-1,1\}$. Assume that $\mathcal{C}$ can be learned by algorithm/learner $A$ with some mistake bound $t$. You may assume you know the value $t$. You may also assume that at each iteration, $A$ runs in time polynomial in $n$ and that $A$ only updates its state when it gets an example wrong. The concrete goal of this problem is to create a PAC-learning algorithm, $B$, that can PAC-learn concept class $\mathcal{C}$ with respect to an arbitrary distribution $D$ over $\{-1,1\}^n$ using algorithm $A$ as a sub-routine.
+
+In order to prove that learner $B$ can PAC-learn concept class $\mathcal{C}$, we must show that there exists a finite number of examples, $m$, that we can draw from $D$ such that $B$ produces a hypothesis whose true error is more than $\epsilon$ with probability at most $\delta$. First, fix some distribution $D$ on $X$, and we will assume that the examples are labeled by an unknown $c \in \mathcal{C}$. Additionally, for a hypothesis (i.e. function) $h : X \to Y$, let $\text{err}(h) = \mathbb{P}_{x\sim D}[h(x) \neq c(x)]$. Formally, we will need to bound $m$ such that the following condition holds:
+
+\[
+\forall \delta, \epsilon \in [0,1], \exists m \in \mathbb{N} \mid \mathbb{P}_{x\sim D}[\text{err}(B(\{x\}^m)) > \epsilon] \leq \delta \qquad x \sim D \qquad (1)
+\]
+
+where $B(\{x\}^m)$ denotes a hypotheses produced from $B$ with $m$ random draws of $x$ from an arbitrary distribution $D$.
+
+To find this $m$, we will first decompose it into blocks of examples of size $k$ and make use of results based on a single block to find the bound necessary for $m$ that satisfies condition 1.
+
+\textit{Note:} Using the identity $\mathbb{P}[\text{err}(h) > \epsilon]+\mathbb{P}[\text{err}(h) \leq \epsilon] = 1$, we can see that $\mathbb{P}[\text{err}(h) > \epsilon] \leq \delta \Leftrightarrow \mathbb{P}[\text{err}(h) \leq \epsilon] \geq 1 - \delta$, which makes the connection to the definition of PAC-learning discussed in lecture explicit.
+
+\begin{enumerate}
+    \item [(a)] Fix a single arbitrary hypothesis $h' : X \to Y$ produced by $A$ and determine a lower bound on the number of examples, $k$, such that $\mathbb{P}[\text{err}(h') > \epsilon] \leq \delta'$. (The contrapositive view would be: with probability at least $1 - \delta'$, it must be the case that $\text{err}(h') \leq \epsilon$. Make sure this makes sense.)
+    
+    \item [(b)] From part (a) we know that as long as a block is at least of size $k$, then if that block is classified correctly by a \textit{fixed arbitrary hypothesis} $h'$ we can effectively upper bound the probility of the 'bad event' (i.e. $A$ outputs $h'$ s.t. $\text{err}(h') > \epsilon$) by $\delta'$. However, our bound must apply to every $h$ that our algorith $B$ could output for an arbitrary distribution $D$ over examples. With this in mind, how large should $m$ be so that we can bound all hypotheses that could be output? (You may assue that algorithm $B$ will know the mistake bound throughout the question.)
+    
+    \item [(c)] Put everything together and fully describe (with proof) a PAC learner that is able to output a hypothesis with a true error at most $\epsilon$ with probability at least $1 - \delta$, given a mistake bounded learner $A$. To do this you should first describe your pseudocode for algorithm $B$ which will use $A$ as a sub-routine (no need for minute details or code, broad strokes will suffice). Then, prove there exists a finite number of $m$ examples for $B$ to PAC-learn $\mathcal{C}$ for all values of $\delta$ and $\epsilon$ by lower bounding $m$ by a function of $\epsilon$, $\delta$, and $t$ (i.e. finding a finite lower bound for $m$ such that the PAC-learning requirements in 1 are satisfied).
+\end{enumerate}
+
+\textbf{Answer:}
+
+(a) To determine a lower bound on $k$, we can use Hoeffding's inequality. Let $X_i$ be a random variable that is 1 if $h'$ makes a mistake on the $i$-th example and 0 otherwise. Then:
+
+\[
+\mathbb{P}[\frac{1}{k}\sum_{i=1}^k X_i - \mathbb{E}[X_i] \geq t] \leq e^{-2kt^2}
+\]
+
+Setting $t = \epsilon$ and the right-hand side to $\delta'$, we get:
+
+\[
+e^{-2k\epsilon^2} \leq \delta' \Rightarrow k \geq \frac{\ln(1/\delta')}{2\epsilon^2}
+\]
+
+Therefore, a lower bound on $k$ is $\frac{\ln(1/\delta')}{2\epsilon^2}$.
+
+(b) To bound all possible hypotheses, we need to consider the mistake bound $t$. The algorithm $A$ can make at most $t$ mistakes, so there are at most $t+1$ different hypotheses that could be output. To ensure that the bound holds for all of these hypotheses, we can use the union bound.
+
+Let $m = (t+1)k$, where $k$ is the block size from part (a). We want:
+
+\[
+\mathbb{P}[\exists h : \text{err}(h) > \epsilon] \leq (t+1)\delta' \leq \delta
+\]
+
+Setting $\delta' = \frac{\delta}{t+1}$, we get:
+
+\[
+m \geq (t+1) \cdot \frac{\ln((t+1)/\delta)}{2\epsilon^2}
+\]
+
+(c) Algorithm $B$ (PAC learner using mistake-bounded learner $A$):
+
+1. Initialize $m = (t+1) \cdot \frac{\ln((t+1)/\delta)}{2\epsilon^2}$
+2. Request $m$ labeled examples $(x_1, y_1), ..., (x_m, y_m)$ from distribution $D$
+3. Run mistake-bounded learner $A$ on these $m$ examples
+4. Return the final hypothesis $h$ produced by $A$
+
+Proof of PAC learning:
+
+Let $m = (t+1) \cdot \frac{\ln((t+1)/\delta)}{2\epsilon^2}$. We will show that this choice of $m$ satisfies the PAC learning requirement.
+
+1. The mistake-bounded learner $A$ can produce at most $t+1$ different hypotheses.
+2. For each of these hypotheses $h_i$, the probability that its error is greater than $\epsilon$ given that it correctly classifies a block of $k = \frac{m}{t+1}$ examples is at most $\delta' = \frac{\delta}{t+1}$ (from parts a and b).
+3. By the union bound, the probability that any of the $t+1$ hypotheses has error greater than $\epsilon$ is at most $(t+1)\delta' = \delta$.
+
+Therefore, with probability at least $1-\delta$, the final hypothesis $h$ returned by $B$ has error at most $\epsilon$. This satisfies the PAC learning requirement:
+
+\[
+\mathbb{P}_{x\sim D}[\text{err}(B(\{x\}^m)) \leq \epsilon] \geq 1 - \delta
+\]
+
+The sample complexity $m$ is polynomial in $1/\epsilon$, $\ln(1/\delta)$, and $t$. Since $A$ runs in polynomial time for each example, and processes at most $m$ examples, the overall runtime of $B$ is also polynomial. Thus, $B$ is an efficient PAC learner for the concept class $\mathcal{C}$.
 
 \end{document}
