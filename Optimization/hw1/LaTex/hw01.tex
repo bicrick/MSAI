@@ -110,8 +110,6 @@
 
     \section{More Convex Sets, Convex Functions, Preservation of Convexity}
 
-\begin{enumerate}
-    \item 
     \begin{enumerate}
         \item 
         \begin{answer}
@@ -120,119 +118,247 @@
         Consider $f_1(x) = x^2$ and $f_2(x) = (x-2)^2$. Both are convex functions.
         Let $f_{\min}(x) = \min\{f_1(x), f_2(x)\}$.
         
+        The sub-level set of $f_{\min}$ for some $c > 0$ is:
+        $S_c = \{x : f_{\min}(x) \leq c\} = \{x : \min\{x^2, (x-2)^2\} \leq c\}$
+        
         $f_{\min}(x)$ is not convex because it forms a "V" shape with a non-convex kink at $x=1$, where the two parabolas intersect.
 
         \begin{center}
-        \begin{tikzpicture}[scale=1.2]
-            % Draw axes
-            \draw[->] (-1,0) -- (3,0) node[right] {$x$};
-            \draw[->] (0,0) -- (0,4) node[above] {$y$};
-            
-            % Draw f1(x) = x^2
-            \draw[blue, domain=-1:3, samples=100] plot (\x, {\x*\x}) node[right] {$f_1(x)$};
-            
-            % Draw f2(x) = (x-2)^2
-            \draw[red, domain=-1:3, samples=100] plot (\x, {(\x-2)*(\x-2)}) node[right] {$f_2(x)$};
-            
-            % Draw f_min(x)
-            \draw[green, thick, domain=-1:1, samples=100] plot (\x, {\x*\x});
-            \draw[green, thick, domain=1:3, samples=100] plot (\x, {(\x-2)*(\x-2)});
-            
-            % Label f_min(x)
-            \node[green] at (2.5,1.5) {$f_{\min}(x)$};
-            
-            % Mark the non-convex kink
-            \fill[black] (1,1) circle (2pt);
-            \node[below right] at (1,1) {kink};
-            
-            % Label axes
-            \node[below left] at (0,0) {$0$};
-            \node[below] at (2,0) {$2$};
-        \end{tikzpicture}
+            \begin{tikzpicture}[scale=1.2]
+                % Draw axes
+                \draw[->] (-1,0) -- (3,0) node[right] {$x$};
+                \draw[->] (0,0) -- (0,4) node[above] {$y$};
+                
+                % Draw f1(x) = x^2
+                \draw[blue, domain=-1:3, samples=100] plot (\x, {\x*\x}) node[right] {$f_1(x)$};
+                
+                % Draw f2(x) = (x-2)^2
+                \draw[red, domain=-1:3, samples=100] plot (\x, {(\x-2)*(\x-2)}) node[right] {$f_2(x)$};
+                
+                % Draw f_min(x)
+                \draw[green, thick, domain=-1:1, samples=100] plot (\x, {\x*\x});
+                \draw[green, thick, domain=1:3, samples=100] plot (\x, {(\x-2)*(\x-2)});
+                
+                % Shade the area below f_min(x)
+                \fill[green, opacity=0.1] (-1,0) -- plot[domain=-1:1] (\x, {\x*\x}) -- 
+                    plot[domain=1:3] (\x, {(\x-2)*(\x-2)}) -- (3,0) -- cycle;
+                
+                % Label f_min(x)
+                \node[green] at (2.5,1.5) {$f_{\min}(x)$};
+                
+                % Mark the non-convex kink
+                \fill[black] (1,1) circle (2pt);
+                \node[below right] at (1,1) {kink};
+                
+                % Label axes
+                \node[below left] at (0,0) {$0$};
+                \node[below] at (2,0) {$2$};
+                
+                % Draw a sample sub-level set
+                \draw[orange, thick, dashed] (-1,1.5) -- (3,1.5) node[right] {$y=c$};
+                \node[orange] at (2.7,1.7) {$S_c$};
+            \end{tikzpicture}
         \end{center}
         
-        As shown in the figure, $f_{\min}(x)$ (in green) follows $f_1(x)$ for $x < 1$ and $f_2(x)$ for $x > 1$, creating a non-convex kink at $x=1$. This demonstrates that the minimum of two convex functions is not necessarily convex.
+        The shaded area represents the region where $f_{\min}(x) \leq y$ for any $y$. The dashed orange line shows a sample sub-level set $S_c$ for some $c > 0$. Note that this sub-level set is not convex, as it consists of two disjoint intervals when $c < 1$.
+        
+        This example demonstrates that the minimum of two convex functions is not necessarily convex, as evidenced by the non-convex kink in $f_{\min}(x)$ and the potentially non-convex sub-level sets.
         \end{answer}
-
-        \item 
+        
+        
         \begin{answer}
         An example of two closed convex sets that are disjoint but cannot be strictly separated:
-        
-        Consider in $\mathbb{R}^2$:
-        $C_1 = \{(x,y) : y \geq e^x\}$
-        $C_2 = \{(x,y) : y \leq 0\}$
-        
-        These sets are closed, convex, and disjoint. However, they cannot be strictly separated because for any separating hyperplane (in this case, a line), there will always be points from both sets arbitrarily close to the hyperplane as $x \to -\infty$.
-        \end{answer}
 
+        Consider the following two sets in $\mathbb{R}^2$:
+
+        $A = \{(x, y) : y \geq e^x\}$
+        $B = \{(x, y) : y \leq 0\}$
+
+        Both $A$ and $B$ are closed convex sets:
+        - $A$ is the epigraph of the exponential function, which is convex.
+        - $B$ is a half-space, which is convex.
+
+        These sets are disjoint because $e^x > 0$ for all $x \in \mathbb{R}$, so no point can simultaneously satisfy $y \geq e^x$ and $y \leq 0$.
+
+        However, they cannot be strictly separated because for any $\epsilon > 0$, we can find points in $A$ and $B$ that are less than $\epsilon$ apart:
+
+        For any $x < 0$ with large magnitude:
+        - The point $(x, e^x)$ is in $A$
+        - The point $(x, 0)$ is in $B$
+        - The distance between these points is $e^x$, which approaches 0 as $x \to -\infty$
+
+        \begin{center}
+        \begin{tikzpicture}[scale=0.8]
+            % Draw axes
+            \draw[->] (-3,0) -- (3,0) node[right] {$x$};
+            \draw[->] (0,-1) -- (0,3) node[above] {$y$};
+            
+            % Draw set A (exponential function)
+            \draw[blue, domain=-3:1.5, samples=100] plot (\x, {exp(\x)});
+            \fill[blue, opacity=0.1] (-3,3) -- plot[domain=-3:1.5] (\x, {exp(\x)}) -- (1.5,3) -- cycle;
+            
+            % Draw set B (y <= 0)
+            \fill[red, opacity=0.1] (-3,-1) rectangle (3,0);
+            
+            % Labels
+            \node[blue] at (2,2.5) {$A$};
+            \node[red] at (2,-0.5) {$B$};
+            
+            % Point out the closeness
+            \draw[<->, green, thick] (-2.5,0) -- (-2.5,0.08);
+            \node[green, right] at (-2.5,0.04) {$e^x \to 0$ as $x \to -\infty$};
+        \end{tikzpicture}
+        \end{center}
+
+        This example demonstrates that while $A$ and $B$ are disjoint closed convex sets, they cannot be strictly separated because they get arbitrarily close to each other as $x \to -\infty$.
+        \end{answer}
         \item 
         \begin{answer}
-        To show that any sub-level set of a convex function is convex:
-        
-        Let $f$ be a convex function and $L_c = \{x : f(x) \leq c\}$ be a sub-level set.
-        Take any $x_1, x_2 \in L_c$ and $\lambda \in [0,1]$.
-        
-        $f(\lambda x_1 + (1-\lambda)x_2) \leq \lambda f(x_1) + (1-\lambda)f(x_2)$ (by convexity of $f$)
-        $\leq \lambda c + (1-\lambda)c = c$
-        
-        Therefore, $\lambda x_1 + (1-\lambda)x_2 \in L_c$, proving $L_c$ is convex.
-        
-        Example of a non-convex function with convex sub-level sets:
-        
-        Consider $f(x) = -x^2$. This function is concave (thus not convex), but all its sub-level sets are convex intervals. For any $c$, $L_c = \{x : -x^2 \leq c\} = [-\sqrt{-c}, \sqrt{-c}]$, which is a convex set.
+        To prove that any sub-level set of a convex function is convex:
+    
+        Let $f: \mathbb{R}^n \to \mathbb{R}$ be a convex function, and $L_c = \{x : f(x) \leq c\}$ be a sub-level set for some $c \in \mathbb{R}$.
+    
+        1) Take any two points $x_1, x_2 \in L_c$. This means $f(x_1) \leq c$ and $f(x_2) \leq c$.
+        2) Consider any point $z = \lambda x_1 + (1-\lambda)x_2$, where $\lambda \in [0,1]$.
+        3) By the definition of convexity: $f(z) \leq \lambda f(x_1) + (1-\lambda)f(x_2)$
+        4) Since $f(x_1) \leq c$ and $f(x_2) \leq c$, we have:
+           $f(z) \leq \lambda c + (1-\lambda)c = c$
+        5) Therefore, $z \in L_c$
+    
+        This proves that any sub-level set of a convex function is convex.
+    
+        Example showing the converse is NOT true:
+    
+        Consider the function $f(x) = -x^2$. This function is concave (not convex).
+    
+        Its sub-level sets are of the form:
+        $L_c = \{x : -x^2 \leq c\}$ or $\{x : x^2 \geq -c\}$
+    
+        For $c < 0$, these sets are intervals of the form $[-\sqrt{-c}, \sqrt{-c}]$, which are convex.
+        For $c \geq 0$, the set is all of $\mathbb{R}$, which is also convex.
+    
+        Thus, all sub-level sets of this non-convex function are convex.
+    
+        \begin{center}
+        \begin{tikzpicture}[scale=0.6]
+            % Draw axes
+            \draw[->] (-3,0) -- (3,0) node[right] {$x$};
+            \draw[->] (0,-3) -- (0,3) node[above] {$y$};
+            
+            % Draw f(x) = -x^2
+            \draw[blue, domain=-2.5:2.5, samples=100] plot (\x, {-\x*\x}) node[right] {$f(x) = -x^2$};
+            
+            % Draw a sample sub-level set
+            \draw[red, thick] (-1.5,0) -- (1.5,0) node[right] {$L_c$};
+            \draw[red, dashed] (-1.5,-2.25) -- (-1.5,0);
+            \draw[red, dashed] (1.5,-2.25) -- (1.5,0);
+            
+            % Labels
+            \node[blue] at (-2,2) {Concave function};
+            \node[red] at (0,-0.5) {Convex sub-level set};
+        \end{tikzpicture}
+        \end{center}
+    
+        This example demonstrates that having convex sub-level sets does not guarantee that the function itself is convex.
         \end{answer}
     \end{enumerate}
-\end{enumerate}
-
-
 \end{enumerate}
 
 \section{Half-Space Representation of Points Closer to v1 than v2}
 
 \begin{enumerate}
-    \item Two dimensions:
-    \begin{answer}
-    For $v_1 = (-1, 0)^T$ and $v_2 = (1, 0)^T$, the set of points closer to $v_1$ than $v_2$ forms a half-space. This half-space is the left half of the plane, separated by the vertical line x = 0. The shaded region would be all points with x < 0.
-    \end{answer}
+    \item Consider two points, $v_1, v_2 \in \mathbb{R}^n$. In this exercise you will show that there exists a vector $c \in \mathbb{R}^n$ and a scalar $d \in \mathbb{R}$ such that
+    
+    $\{x : ||x - v_1||_2 \leq ||x - v_2||_2\} = \{x : c^T x \leq d\}$.
 
-    \item Finding c and d for the two-dimensional case:
     \begin{answer}
-    For the given example, we need to find $c = (c_1, c_2)^T$ and $d \in \mathbb{R}$ such that:
-    
-    $\{(x_1, x_2)^T : c_1x_1 + c_2x_2 \leq d\}$
-    
-    represents the shaded region (x < 0).
-    
-    We can choose:
-    $c = (1, 0)^T$ and $d = 0$
-    
-    This gives us the inequality: $x_1 \leq 0$, which correctly describes the left half-plane.
-    \end{answer}
+    Let's address each part of the question:
 
-    \item Generalization to n dimensions:
-    \begin{answer}
-    For general points $v_1, v_2 \in \mathbb{R}^n$, we can find $c \in \mathbb{R}^n$ and $d \in \mathbb{R}$ as follows:
-    
-    $c = v_2 - v_1$
-    $d = \frac{1}{2}(||v_2||^2 - ||v_1||^2)$
-    
-    To prove this, we start with the condition $||x - v_1||_2 \leq ||x - v_2||_2$:
-    
-    $(x - v_1)^T(x - v_1) \leq (x - v_2)^T(x - v_2)$
-    
-    Expanding and simplifying:
-    
-    $x^Tx - 2v_1^Tx + v_1^Tv_1 \leq x^Tx - 2v_2^Tx + v_2^Tv_2$
-    
-    $-2v_1^Tx + v_1^Tv_1 \leq -2v_2^Tx + v_2^Tv_2$
-    
-    $2(v_2 - v_1)^Tx \leq v_2^Tv_2 - v_1^Tv_1$
-    
-    $(v_2 - v_1)^Tx \leq \frac{1}{2}(v_2^Tv_2 - v_1^Tv_1)$
-    
-    This is equivalent to $c^Tx \leq d$ with $c$ and $d$ as defined above.
-    
-    Thus, we have shown that the set of points in $\mathbb{R}^n$ that are closer to point $v_1$ than to point $v_2$ indeed form a half-space, represented by $\{x : c^Tx \leq d\}$.
+    \begin{enumerate}
+        \item Two dimensions: consider the above problem in two dimensions, where $v_1 = (-1,0)^T$, and $v_2 = (1,0)^T$. Draw the set of points that are closer to $v_1$ than $v_2$, by shading the plane. This should be a half-space!
+
+        Here's a visualization of this 2D example:
+        
+        \begin{center}
+            \begin{tikzpicture}[scale=1.2]
+                % Shade the left half-plane
+                \fill[blue!10] (-3,-3) rectangle (0,3);
+                
+                % Draw the dividing line
+                \draw[blue, thick] (0,-3) -- (0,3);
+                
+                % Draw axes on top of the shaded area
+                \draw[<->] (-3,0) -- (3,0) node[right] {$x_1$};
+                \draw[<->] (0,-3) -- (0,3) node[above] {$x_2$};
+                
+                % Plot points v1 and v2
+                \fill[blue] (-1,0) circle (2pt) node[below left] {$v_1$};
+                \fill[red] (1,0) circle (2pt) node[below right] {$v_2$};
+                
+                % Add labels
+                \node[blue, scale=0.8] at (-2,2) {Points closer to $v_1$};
+                \node[scale=0.8] at (2,2) {Points closer to $v_2$};
+            \end{tikzpicture}
+            \end{center}
+
+        In this visualization:
+        - The blue shaded area represents the half-space containing all points closer to $v_1$ than to $v_2$.
+        - The red line is the perpendicular bisector of the line segment joining $v_1$ and $v_2$, representing the boundary where points are equidistant from $v_1$ and $v_2$.
+        - $v_1 = (-1, 0)$ is shown in blue, and $v_2 = (1, 0)$ is shown in red.
+
+        \item For the above example, find the two-dimensional vector $c = (c_1, c_2)^T$ and the scalar $d$ that describes the shaded region from the above. So in other words, the shaded region you drew must correspond to:
+        
+        $\{(x_1, x_2)^T : c_1x_1 + c_2x_2 \leq d\}$.
+
+        For this example where $v_1 = (-1, 0)^T$ and $v_2 = (1, 0)^T$:
+        
+        $c = 2(v_2 - v_1) = 2((1, 0)^T - (-1, 0)^T) = (4, 0)^T$
+        So, $c_1 = 4$ and $c_2 = 0$
+
+        $d = v_2^Tv_2 - v_1^Tv_1 = 1^2 + 0^2 - (-1)^2 - 0^2 = 0$
+        
+        Therefore, the half-space is described by:
+        $\{(x_1, x_2)^T : 4x_1 + 0x_2 \leq 0\}$ or simply $\{(x_1, x_2)^T : x_1 \leq 0\}$
+        
+        This corresponds to the left half-plane in our visualization.
+
+        \item Finally, generalize the above. For general points $v_1, v_2 \in \mathbb{R}^n$, find a vector $c \in \mathbb{R}^n$ and a scalar $d \in \mathbb{R}$ such that
+        
+        $\{x : ||x - v_1||_2 \leq ||x - v_2||_2\} = \{x : c^T x \leq d\}$.
+
+        To prove this for general $v_1, v_2 \in \mathbb{R}^n$, we'll follow these steps:
+
+        1) Start with the inequality: $||x - v_1||_2 \leq ||x - v_2||_2$
+
+        2) Square both sides (since both sides are non-negative, this preserves the inequality):
+        $(x - v_1)^T(x - v_1) \leq (x - v_2)^T(x - v_2)$
+
+        3) Expand:
+        $x^Tx - 2v_1^Tx + v_1^Tv_1 \leq x^Tx - 2v_2^Tx + v_2^Tv_2$
+
+        4) The $x^Tx$ terms cancel out:
+        $-2v_1^Tx + v_1^Tv_1 \leq -2v_2^Tx + v_2^Tv_2$
+
+        5) Rearrange:
+        $2(v_2 - v_1)^Tx \leq v_2^Tv_2 - v_1^Tv_1$
+
+        6) Now we can identify:
+        $c = 2(v_2 - v_1)$
+        $d = v_2^Tv_2 - v_1^Tv_1$
+
+        7) Let's plug these back into the inequality $c^T x \leq d$ to verify:
+        $[2(v_2 - v_1)]^T x \leq v_2^Tv_2 - v_1^Tv_1$
+        $2(v_2 - v_1)^T x \leq v_2^Tv_2 - v_1^Tv_1$
+
+        This is exactly the inequality we derived in step 5, confirming that our expressions for c and d are correct.
+
+        Thus, we have shown that:
+        $\{x : ||x - v_1||_2 \leq ||x - v_2||_2\} = \{x : c^T x \leq d\}$
+
+where $c = 2(v_2 - v_1)$ and $d = v_2^Tv_2 - v_1^Tv_1$.
+
+        This proves that the set of points in $\mathbb{R}^n$ that are closer to point $v_1$ than to point $v_2$ form a half-space for any dimension $n$.
+    \end{enumerate}
     \end{answer}
 \end{enumerate}
 

@@ -1,6 +1,6 @@
 # Fdb version 4
-["pdflatex"] 1725862207.91441 "/Users/b407404/Desktop/Misc/MSAI/Optimization/hw1/LaTex/hw01.tex" "hw01.pdf" "hw01" 1725862208.37607 0
-  "/Users/b407404/Desktop/Misc/MSAI/Optimization/hw1/LaTex/hw01.tex" 1725862207.21949 9852 141172adee97886a4b29efebe07dd87e ""
+["pdflatex"] 1725940705.93181 "/Users/b407404/Desktop/Misc/MSAI/Optimization/hw1/LaTex/hw01.tex" "hw01.pdf" "hw01" 1725940706.53129 0
+  "/Users/b407404/Desktop/Misc/MSAI/Optimization/hw1/LaTex/hw01.tex" 1725940705.74348 16257 6c3038dd3b6fa298bd252bd72c936733 ""
   "/usr/local/texlive/2024basic/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm" 1246382020 1004 54797486969f23fa377b128694d548df ""
   "/usr/local/texlive/2024basic/texmf-dist/fonts/tfm/public/amsfonts/symbols/msam10.tfm" 1246382020 916 f87d7c45f9c908e672703b83b72241a3 ""
   "/usr/local/texlive/2024basic/texmf-dist/fonts/tfm/public/amsfonts/symbols/msam5.tfm" 1246382020 924 9904cf1d39e9767e7a3622f2a125a565 ""
@@ -111,8 +111,8 @@
   "/usr/local/texlive/2024basic/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1725484170 79187 3707ba1a1c2304ab6bb6cb291e5e6f79 ""
   "/usr/local/texlive/2024basic/texmf-var/web2c/pdftex/pdflatex.fmt" 1725484211 7553976 a02f72d30e53774feece7abddabccb1d ""
   "/usr/local/texlive/2024basic/texmf.cnf" 1710011638 628 8b896f7d9d41b43f4346b9091e52171f ""
-  "hw01.aux" 1725862208.33567 469 401535417181aa47108ff5a11257b2fa "pdflatex"
-  "hw01.tex" 1725862207.21949 9852 141172adee97886a4b29efebe07dd87e ""
+  "hw01.aux" 1725940706.49161 469 eff5a1478aed374626f1a19a7282b516 "pdflatex"
+  "hw01.tex" 1725940705.74348 16257 6c3038dd3b6fa298bd252bd72c936733 ""
   (generated)
   "hw01.aux"
   "hw01.log"
