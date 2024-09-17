@@ -1,0 +1,188 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\title{The University of Texas at Austin\\Optimization\\Homework 2}
+\author{Constantine Caramanis, Sujay Sanghavi}
+
+\begin{document}
+
+\maketitle
+
+\section*{Submitting solutions}
+Please submit your solutions as a single pdf file. If you have code or figures, please include these in the pdf.
+
+This problem set gives us some practice in (a) formulating LPs, (b) graphically solving them in order to reinforce the geometric meaning of the constraints and the objective, and again to see that optimal solutions can be found at extreme points (corners), and (c) reformulating problems that are not stated as LPs into LPs, to reinforce the idea that the class of LP problems is broader than it might initially appear.
+
+\section{Problem 1}
+In this problem, you will formulate an explicit linear program to model the problem below. Thus, you must state what are the decision variables, and then what is the vector corresponding to the objective function, the matrix corresponding to the constraints, etc.
+
+A small start-up company makes three products, creatively named Widget A, Widget B and Widget C. The company has 4 available workers it has hired, and the workers have different rates as they work on each of the three widgets. Also, because of the nature of their contracts, the workers charge a different amount depending on which widget they are working on. The time it takes for worker $i$ to make on widget of time A, B or C, and the amount they charge depending on the widget, are summarized in the two tables given.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|c|cccc|}
+\hline
+\multicolumn{1}{|c|}{} & \multicolumn{4}{c|}{worker} \\
+\multicolumn{1}{|c|}{} & 1 & 2 & 3 & 4 \\
+\hline
+A & 5 & 7 & 4 & 10 \\
+B & 6 & 12 & 8 & 15 \\
+C & 13 & 14 & 9 & 17 \\
+\hline
+\end{tabular}
+\caption{Time in minutes it takes Worker $i$ to make one unit of Widget $j$.}
+\end{table}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|c|cccc|}
+\hline
+\multicolumn{1}{|c|}{} & \multicolumn{4}{c|}{worker} \\
+\multicolumn{1}{|c|}{} & 1 & 2 & 3 & 4 \\
+\hline
+A & 10 & 8 & 6 & 9 \\
+B & 18 & 20 & 15 & 17 \\
+C & 15 & 16 & 13 & 17 \\
+\hline
+\end{tabular}
+\caption{Cost for one hour of Worker $i$ when working on Widget $j$.}
+\end{table}
+
+Suppose each worker works for 35 hours each week. Due to the company's commitments to existing customers, the company must produce at least 100 units of Widget A, 150 units of Widget B and 100 units of Widgets C. Write a linear program that will tell the company how to assign each worker in order that the demand for each widget is met, and cost to the company is minimized.
+
+\section{Problem 2}
+Consider the following LP:
+\begin{align*}
+\min \quad & -x_1 - x_2 \\
+\text{s.t.} \quad & x_1 + 3x_2 \leq 3 \\
+& 2x_1 + x_2 \leq 3 \\
+& 4x_1 + 4x_2 \geq 1 \\
+& x_1, x_2 \geq 0.
+\end{align*}
+
+\begin{enumerate}[(a)]
+\item Draw the feasible set.
+\item Compute explicitly all extreme points. Which is the optimal one?
+\item Now use the level set method to find the optimal solution. That is, draw the level sets of the objective function, and show that you find the same optimal solution as you did by enumeration in the previous part of this exercise.
+\end{enumerate}
+
+\section{Problem 3}
+Formulate the following problems as LPs:
+\begin{enumerate}[(a)]
+\item minimize $\|Ax - b\|_1$ subject to $\|x\|_\infty \leq 1$.
+\item minimize $\|x\|_1$ subject to $\|Ax - b\|_\infty \leq 1$.
+\item minimize $\|Ax - b\|_1 + \|x\|_\infty$.
+\end{enumerate}
+
+In each problem, $A \in \mathbb{R}^{m\times n}$ and $b \in \mathbb{R}^m$ are given, and $x \in \mathbb{R}^n$ is the optimization variable. As a reminder, the 1-norm and infinity norm of $x \in \mathbb{R}^n$ are defined as
+\begin{align*}
+\|x\|_1 &= \sum_{i=1}^n |x_i|, \\
+\|x\|_\infty &= \max_{i=1,\ldots,n} |x_i|
+\end{align*}
+
+\section{Problem 4}
+Formulate the following problems as LPs.
+\begin{enumerate}[(a)]
+\item Given $A \in \mathbb{R}^{m\times n}, b \in \mathbb{R}^m$, minimize
+\[\sum_{i=1}^m \max\{0, a_i^T x + b_i\}\]
+The variable is $x \in \mathbb{R}^n$.
+\item (Optional) Given $p+1$ matrices $A_0, A_1, \ldots, A_p \in \mathbb{R}^{m\times n}$, find the vector $x \in \mathbb{R}^p$ that minimizes
+\[\max_{\|y\|_1=1} \|(A_0 + x_1A_1 + \ldots + x_pA_p)y\|_1\]
+\end{enumerate}
+
+\section{Problem 5 (Optional)}
+We are given $p$ matrices $A_i \in \mathbb{R}^{n\times n}$, and we would like to find a single matrix $X \in \mathbb{R}^{n\times n}$ that we can use as an approximate right-inverse for each matrix $A_i$, i.e., we would like to have $A_iX \approx I, i = 1,\ldots,p$. We can do this by solving the following optimization problem with $X$ as variable:
+\begin{equation}
+\text{minimize} \quad \max_{i=1,\ldots,p} \|I - A_iX\|_\infty
+\end{equation}
+
+Here $\|H\|_\infty$ is the 'infinity-norm' or 'max-row-sum norm' of a matrix $H$, defined as
+\[\|H\|_\infty = \max_{i=1,\ldots,m} \sum_{j=1}^n |H_{ij}|,\]
+if $H \in \mathbb{R}^{m\times n}$. Express problem (1) as an LP. You don't have to reduce the LP to a canonical form, as long as you are clear about what the variables are, what the meaning is of any auxiliary variables that you introduce, and why the LP is equivalent to the problem (1).
+
+\section{Problem 6}
+For each of the following LPs, express the optimal value and the optimal solution in terms of the problem parameters $(c,k,d,\alpha,d_1,d_2,\ldots)$. If the optimal solution is not unique, it is sufficient to give one optimal solution.
+
+Do any 5 of the following 11. The rest are optional.
+
+\begin{enumerate}[(a)]
+\item 
+\begin{align*}
+\text{minimize} \quad & c^T x \\
+\text{subject to} \quad & 0 \leq x \leq 1.
+\end{align*}
+The variable is $x \in \mathbb{R}^n$.
+
+\item 
+\begin{align*}
+\text{minimize} \quad & c^T x \\
+\text{subject to} \quad & -1 \leq x \leq 1.
+\end{align*}
+The variable is $x \in \mathbb{R}^n$.
+
+\item 
+\begin{align*}
+\text{minimize} \quad & c^T x \\
+\text{subject to} \quad & -1 \leq 1^T x \leq 1.
+\end{align*}
+The variable is $x \in \mathbb{R}^n$.
+
+\item 
+\begin{align*}
+\text{minimize} \quad & c^T x \\
+\text{subject to} \quad & 1^T x = 1, x \geq 0.
+\end{align*}
+The variable is $x \in \mathbb{R}^n$.
+
+\item 
+\begin{align*}
+\text{maximize} \quad & c^T x \\
+\text{subject to} \quad & 1^T x = k, 0 \leq x \leq 1.
+\end{align*}
+The variable is $x \in \mathbb{R}^n$. $k$ is an integer with $1 \leq k \leq n$.
+
+\item 
+\begin{align*}
+\text{maximize} \quad & c^T x \\
+\text{subject to} \quad & 1^T x \leq k, 0 \leq x \leq 1
+\end{align*}
+The variable is $x \in \mathbb{R}^n$. $k$ is an integer with $1 \leq k \leq n$.
+
+\item 
+\begin{align*}
+\text{maximize} \quad & c^T x \\
+\text{subject to} \quad & d^T x = \alpha, 0 \leq x \leq 1.
+\end{align*}
+The variable is $x \in \mathbb{R}^n$. $\alpha$ and the components of $d$ are positive.
+
+\item 
+\begin{align*}
+\text{minimize} \quad & c^T x \\
+\text{subject to} \quad & 0 \leq x_1 \leq x_2 \leq \ldots \leq x_n \leq 1.
+\end{align*}
+The variable is $x \in \mathbb{R}^n$.
+
+\item 
+\begin{align*}
+\text{maximize} \quad & c^T x \\
+\text{subject to} \quad & -y \leq x \leq y, 1^T y = k, y \leq 1.
+\end{align*}
+The variables are $x \in \mathbb{R}^n$ and $y \in \mathbb{R}^n$. $k$ is an integer with $1 \leq k \leq n$.
+
+\item 
+\begin{align*}
+\text{minimize} \quad & 1^T u + 1^T v \\
+\text{subject to} \quad & u - v = c, u \geq 0, v \geq 0
+\end{align*}
+The variables are $u \in \mathbb{R}^n$ and $v \in \mathbb{R}^n$.
+
+\item 
+\begin{align*}
+\text{minimize} \quad & d_1^T u - d_2^T v \\
+\text{subject to} \quad & u - v = c, u \geq 0, v \geq 0.
+\end{align*}
+The variables are $u \in \mathbb{R}^n$ and $v \in \mathbb{R}^n$. We assume that $d_1 \geq d_2$.
+\end{enumerate}
+
+\end{document}
