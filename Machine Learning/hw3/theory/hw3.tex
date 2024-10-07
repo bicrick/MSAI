@@ -1,0 +1,154 @@
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+
+\begin{document}
+
+\begin{center}
+    \framebox{
+        \begin{minipage}{0.95\textwidth}
+            \centering
+            \large\textbf{CS/DSC/AI 391L: Machine Learning}\\[0.5em]
+            \Large\textbf{Homework 3 - Theory}\\[0.5em]
+            \large Lecture: Prof. Adam Klivans\\
+            Keywords: SVD, PCA\\[0.5em]
+            \large Name: Patrick Brown \hspace{2cm} EID: pbb468
+        \end{minipage}
+    }
+\end{center}
+
+\vspace{1cm}
+
+\textbf{Instructions:} Please either typeset your answers ({\LaTeX} recommended) or write them very clearly and legibly and scan them, and upload the PDF on edX. Legibility and clarity are critical for fair grading.
+
+\begin{enumerate}
+    \item Let $A$ be an $m \times d$ matrix, and let $X = AA^T$. Assume that $X$ has $d$ distinct, non-zero eigenvalues. Assume that $m \gg d$. In order to find the eigendecomposition of $X$, we will need to find the eigendecomposition of an $m \times m$ matrix. Since $m$ is much larger than $d$, this is slow. Give an algorithm for finding the eigenvectors and eigenvalues of $X$ that only requires computing the eigendecomposition of a $d \times d$ matrix. You can use simple matrix operations and assume that you have an eigendecomposition ``black box'' subroutine, but avoid using the SVD as a black box.
+\end{enumerate}
+
+\section*{Solution to Problem 1}
+
+To efficiently find the eigenvectors and eigenvalues of the matrix $X = AA^T$ without directly computing the eigendecomposition of the large $m \times m$ matrix $X$, you can leverage the relationship between $X$ and the smaller $d \times d$ matrix $Y = A^T A$. Here's the step-by-step algorithm:
+
+\begin{enumerate}
+    \item \textbf{Compute $Y = A^T A$:}
+    \begin{itemize}
+        \item $Y$ is a $d \times d$ matrix, which is much smaller than $X$ since $m \gg d$.
+        \item This computation is efficient because it involves multiplying a $d \times m$ matrix $A^T$ with an $m \times d$ matrix $A$.
+    \end{itemize}
+
+    \item \textbf{Perform Eigendecomposition of $Y$:}
+    \begin{itemize}
+        \item Use your eigendecomposition black-box subroutine to find the eigenvalues $\lambda_i$ and corresponding eigenvectors $v_i$ of $Y$:
+        $Y v_i = \lambda_i v_i, \quad i = 1, 2, \dots, d$
+        \item Since $Y$ is symmetric and positive definite (because $X$ has $d$ distinct, non-zero eigenvalues), all eigenvalues $\lambda_i$ are positive and eigenvectors $v_i$ can be chosen to be orthonormal.
+    \end{itemize}
+
+    \item \textbf{Compute the Eigenvectors of $X$:}
+    \begin{itemize}
+        \item For each eigenvalue $\lambda_i$ and eigenvector $v_i$ of $Y$, compute the corresponding eigenvector $u_i$ of $X$ using:
+        $u_i = \frac{1}{\sqrt{\lambda_i}} A v_i$
+        \item This shows that $u_i$ satisfies the eigenvalue equation $X u_i = \lambda_i u_i$.
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Summary of the Algorithm:}
+
+\textbf{Input:} $A \in \mathbb{R}^{m \times d}$
+
+\textbf{Output:} Eigenvalues $\lambda_i$ and eigenvectors $u_i$ of $X = AA^T$
+
+\textbf{Steps:}
+\begin{enumerate}
+    \item Compute $Y = A^T A$.
+    \item Compute the eigenvalues $\lambda_i$ and eigenvectors $v_i$ of $Y$.
+    \item For each $i$, compute $u_i = \frac{1}{\sqrt{\lambda_i}} A v_i$.
+    \item The pairs $(\lambda_i, u_i)$ are the eigenvalues and eigenvectors of $X$.
+\end{enumerate}
+
+\textbf{Advantages of This Approach:}
+\begin{itemize}
+    \item \textbf{Efficiency:} Only requires eigendecomposition of a $d \times d$ matrix instead of an $m \times m$ matrix.
+    \item \textbf{Avoids SVD:} Does not rely on singular value decomposition as a black box.
+    \item \textbf{Simplicity:} Utilizes basic linear algebra operations and a standard eigendecomposition subroutine.
+\end{itemize}
+
+By following this algorithm, you can efficiently compute the eigendecomposition of $X = AA^T$ without the computational burden associated with large matrices.
+
+\section*{Problem 2}
+
+In this problem we explore some relationships between SVD, PCA and linear regression.
+
+\begin{enumerate}
+    \item True or false: linear regression is primarily a technique of supervised learning, i.e. where we are trying to fit a function to labeled data.
+
+    \textbf{Solution:} True. 
+    
+    Linear regression is indeed primarily a technique of supervised learning. In linear regression, we have a set of input features (independent variables) and corresponding output values (dependent variable). The goal is to find a linear function that best fits this labeled data, allowing us to predict the output for new, unseen inputs. This process of learning from labeled examples (where we have both inputs and their corresponding outputs) is the essence of supervised learning.
+
+    Key points:
+    \begin{itemize}
+        \item We have labeled data: pairs of inputs (x) and outputs (y).
+        \item We're trying to fit a function (y = wx + b) to this data.
+        \item The learned function can then be used to make predictions on new, unseen data.
+        \item The learning process involves minimizing the error between predicted and actual output values, which requires knowing the true output values (labels).
+    \end{itemize}
+
+    \item True or false: PCA is primarily a technique of unsupervised learning, i.e. where we are trying to find structure in unlabeled data.
+
+    \textbf{Solution:} True.
+
+    Principal Component Analysis (PCA) is indeed primarily a technique of unsupervised learning. PCA is used to find patterns and structure in data without the need for labeled outputs. It aims to reduce the dimensionality of the data while preserving as much variance as possible.
+
+    Key points:
+    \begin{itemize}
+        \item PCA works with unlabeled data: it doesn't require output labels for the input features.
+        \item The goal is to find the directions (principal components) of maximum variance in the data.
+        \item PCA discovers structure and patterns in the data without guidance from labeled outcomes.
+        \item It can be used for dimensionality reduction, feature extraction, and data visualization without supervision.
+    \end{itemize}
+    
+    \item True or false: SVD is primarily an operation on a dataset whereas PCA is primarily an operation on a matrix.
+
+    \textbf{Solution:} False.
+
+    This statement is incorrect. Both Singular Value Decomposition (SVD) and Principal Component Analysis (PCA) are primarily operations on matrices, not datasets directly.
+
+    Key points:
+    \begin{itemize}
+        \item SVD is a matrix factorization method that decomposes a matrix into three matrices: $A = U\Sigma V^T$.
+        \item PCA is often implemented using SVD and operates on the covariance matrix of the data.
+        \item Both SVD and PCA work with matrices that represent datasets, but the operations themselves are matrix operations.
+        \item While PCA is often used for data analysis and dimensionality reduction, the core algorithm operates on a matrix (usually the covariance matrix or directly on the centered data matrix).
+        \item SVD can be applied to any matrix, not necessarily representing a dataset, and is used in various applications beyond data analysis.
+    \end{itemize}
+
+    \item A common problem in linear regression is multicollinearity, where the input variables are themselves linearly dependent. For example, imagine a healthcare data set where height is measured both in inches and centimetres. This is a problem because there may now be multiple $w$ satisfying $y = w \cdot x$. Explain how you could use a preprocessing step to solve this problem.
+
+    \textbf{Solution:} 
+    To address the problem of multicollinearity, we can use Principal Component Analysis (PCA) as a preprocessing step:
+
+    \begin{itemize}
+        \item \textbf{Apply PCA:} Transform the input space into orthogonal 
+              principal components, effectively removing linear dependencies.
+        
+        \item \textbf{Dimensionality Reduction:} Keep only the top k principal 
+              components that explain most of the variance in the data.
+        
+        \item \textbf{Benefits:} This approach not only solves multicollinearity 
+              but also reduces the dimensionality of the input space, potentially 
+              improving model performance and interpretability.
+    \end{itemize}
+
+    By using PCA, we create new uncorrelated features from the original 
+    linearly dependent variables, addressing multicollinearity while 
+    preserving the important information in the data.
+\end{enumerate}
+
+\end{document}
