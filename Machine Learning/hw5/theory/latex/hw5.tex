@@ -1,0 +1,171 @@
+\documentclass{article}
+\usepackage{fancybox}
+\usepackage{amsmath}
+\usepackage{enumitem}
+
+\begin{document}
+
+\begin{center}
+\framebox{
+\begin{minipage}{0.95\textwidth}
+\begin{center}
+\textbf{CS/DSC/AI 391L: Machine Learning}
+
+\vspace{0.3cm}
+Homework 5 - Theory
+
+\vspace{0.2cm}
+\textit{Lecture: Prof. Qiang Liu}
+\end{center}
+\end{minipage}
+}
+\end{center}
+
+\section*{Problem 1: Gaussian Graphical Models}
+
+\subsection*{(a) Are $X_3$ and $X_4$ correlated?}
+
+\textbf{Answer:} \textbf{No}, $X_3$ and $X_4$ are \textbf{uncorrelated}.
+
+\textbf{Explanation:}
+In the covariance matrix $\Sigma$, the covariance between $X_3$ and $X_4$ is given by the entry $\Sigma_{34}$. Looking at $\Sigma$:
+
+$$\Sigma_{34} = 0$$
+
+Since $\Sigma_{34} = 0$, the covariance between $X_3$ and $X_4$ is zero, indicating that they are uncorrelated.
+
+\subsection*{(b) Are $X_3$ and $X_4$ conditionally correlated given $X_1$ and $X_2$?}
+
+\textbf{Answer:} \textbf{No}, $X_3$ and $X_4$ are \textbf{conditionally uncorrelated} given $X_1$ and $X_2$; that is, $\text{cov}(X_3, X_4 \mid X_1, X_2) = 0$
+
+\textbf{Explanation:}
+To determine conditional correlation, we need to:
+1. Extract the relevant submatrix from $\Sigma^{-1}$
+2. Check if the corresponding entry is zero
+
+Looking at $\Sigma^{-1}$, the entry corresponding to $X_3$ and $X_4$ is zero, indicating conditional independence.
+
+\subsection*{(c) What is the Markov blanket of $X_2$?}
+
+\textbf{Answer:} The Markov blanket of $X_2$ is $\{X_1\}$
+
+\textbf{Explanation:}
+The Markov blanket consists of:
+1. Parents
+2. Children
+3. Other parents of the children
+
+Looking at $\Sigma^{-1}$, $X_2$ is only connected to $X_1$, making $X_1$ its only neighbor in the graph.
+
+\subsection*{(d) Compute $\Sigma_Y$}
+
+Given:
+$$\Sigma_Y = \begin{bmatrix}
+\Sigma_{11} + 0.2 & \Sigma_{12} - 0.2 \\
+\Sigma_{12} - 0.2 & \Sigma_{22} + 0.2
+\end{bmatrix}$$
+
+Substitute the values from $\Sigma$:
+$$\Sigma_Y = \begin{bmatrix}
+0.71 + 0.2 & -0.43 - 0.2 \\
+-0.43 - 0.2 & 0.46 + 0.2
+\end{bmatrix} = \begin{bmatrix}
+0.91 & -0.63 \\
+-0.63 & 0.66
+\end{bmatrix}$$
+
+\section*{Problem 2: Expectation Maximization (EM)}
+
+\subsection*{(a) Next Iteration Values of $\mu_1$ and $\mu_2$}
+
+\textbf{Given:}
+\begin{itemize}
+    \item Data points: $x^{(1)} = -1$ and $x^{(2)} = 1$
+    \item Initial means: $\mu_1^{(0)} = -2$ and $\mu_2^{(0)} = 2$
+    \item Gaussian components: $N(\mu_1, 1)$ and $N(\mu_2, 1)$
+\end{itemize}
+
+\textbf{E-step:} Computing responsibilities $\gamma_{ij}$, the probability that point $x^{(i)}$ belongs to component $j$.
+
+For $x^{(1)} = -1$:
+\begin{align*}
+\gamma_{11} &= \frac{N(x^{(1)} | \mu_1^{(0)}, 1)}{N(x^{(1)} | \mu_1^{(0)}, 1) + N(x^{(1)} | \mu_2^{(0)}, 1)} \\
+&= \frac{e^{-\frac{(-1 - (-2))^2}{2}}}{e^{-\frac{(-1 - (-2))^2}{2}} + e^{-\frac{(-1 - 2)^2}{2}}} \\
+&= \frac{e^{-0.5}}{e^{-0.5} + e^{-4.5}} \\
+&= \frac{1}{1 + e^{-4}} \approx 0.98 \\
+\gamma_{12} &= 1 - \gamma_{11} \approx 0.02
+\end{align*}
+
+Similarly, for $x^{(2)} = 1$:
+\begin{align*}
+\gamma_{21} &= \frac{N(x^{(2)} | \mu_1^{(0)}, 1)}{N(x^{(2)} | \mu_1^{(0)}, 1) + N(x^{(2)} | \mu_2^{(0)}, 1)} \\
+&= \frac{e^{-\frac{(1 - (-2))^2}{2}}}{e^{-\frac{(1 - (-2))^2}{2}} + e^{-\frac{(1 - 2)^2}{2}}} \\
+&= \frac{e^{-4.5}}{e^{-4.5} + e^{-0.5}} \\
+&= \frac{1}{1 + e^{4}} \approx 0.02 \\
+\gamma_{22} &= 1 - \gamma_{21} \approx 0.98
+\end{align*}
+
+\textbf{M-step:} Update means using weighted averages:
+\begin{align*}
+\mu_1^{(1)} &= \frac{\gamma_{11}x^{(1)} + \gamma_{21}x^{(2)}}{\gamma_{11} + \gamma_{21}} \\
+&= \frac{0.98(-1) + 0.02(1)}{0.98 + 0.02} \\
+&= -0.96 \\
+\\
+\mu_2^{(1)} &= \frac{\gamma_{12}x^{(1)} + \gamma_{22}x^{(2)}}{\gamma_{12} + \gamma_{22}} \\
+&= \frac{0.02(-1) + 0.98(1)}{0.02 + 0.98} \\
+&= 0.96
+\end{align*}
+
+\textbf{Answer:} Next iteration yields $\mu_1 = -0.96$, $\mu_2 = 0.96$
+
+\subsection*{(b) Convergence Analysis}
+
+The EM algorithm will not converge to $\mu_1 = -1$ and $\mu_2 = 1$ because:
+
+\begin{itemize}
+    \item The responsibilities are always between 0 and 1
+    \item Each new mean is a weighted average of both data points
+    \item This causes the means to move closer together in each iteration
+    \item Eventually, both means will converge to 0 (the average of the data points)
+\end{itemize}
+
+\subsection*{(c) Fixed Point Analysis}
+
+Starting from $\mu_1 = \mu_2 = 2$:
+\begin{itemize}
+    \item When both means are equal, each point has equal responsibility (0.5) for each component
+    \item In the M-step, both means will update to the average of all points:
+    \begin{align*}
+    \mu_1 = \mu_2 &= \frac{0.5(-1) + 0.5(1)}{0.5 + 0.5} = 0
+    \end{align*}
+    \item Once the means are both 0, they will remain there in subsequent iterations
+\end{itemize}
+
+\textbf{Answer:} The fixed point is $\mu_1 = \mu_2 = 0$
+
+\subsection*{(d) K-means Fixed Point}
+
+\textbf{K-means Steps:}
+\begin{enumerate}
+    \item \textbf{Assignment Step:}
+    \begin{itemize}
+        \item $x^{(1)} = -1$ is closer to $\mu_1 = -2$
+        \item $x^{(2)} = 1$ is closer to $\mu_2 = 2$
+    \end{itemize}
+    
+    \item \textbf{Update Step:}
+    \begin{itemize}
+        \item $\mu_1 = \text{mean of points assigned to cluster 1} = -1$
+        \item $\mu_2 = \text{mean of points assigned to cluster 2} = 1$
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Convergence:}
+\begin{itemize}
+    \item The assignments remain the same in subsequent iterations
+    \item The means do not change after this point
+\end{itemize}
+
+\textbf{Answer:} The fixed point of K-means is $\mu_1 = -1$ and $\mu_2 = 1$
+
+\end{document}

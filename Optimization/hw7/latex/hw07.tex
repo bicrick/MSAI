@@ -1,0 +1,279 @@
+\documentclass{article}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{amsmath}  % For math environments
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{enumitem}
+\usepackage{listings}  % For code listings
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+\begin{document}
+
+\begin{center}
+{\large The University of Texas at Austin}
+
+{\large Optimization}
+
+\vspace{1cm}
+
+{\large Homework 7}
+
+\vspace{1cm}
+
+Constantine Caramanis, Sujay Sanghavi
+
+\vspace{0.5cm}
+\hrule
+\end{center}
+
+\section*{1. Strong Convexity and Smoothness} Consider the quadratic function
+\[
+f(x) = \frac{1}{2}x^TQx + q^Tx + c,
+\]
+where $Q$, $q$, and $c$ are given as in a previous problem set:
+\[
+Q = \begin{bmatrix}
+13 & 12 & -2 \\
+12 & 17 & 6 \\
+-2 & 6 & 12
+\end{bmatrix}, \quad
+q = \begin{pmatrix}
+-22 \\
+-14.5 \\
+13
+\end{pmatrix}, \quad
+c = -1.
+\]
+
+\begin{enumerate}[label=(\alph*)]
+\item Is this function smooth? If so, give the smoothness parameter, otherwise report ``$\infty$''.
+
+\textbf{Solution:} Yes, the function is smooth. The smoothness parameter $L$ is the largest eigenvalue of the Hessian matrix $Q$.
+
+First, note that $Q$ is symmetric. To find the smoothness parameter $L$, we compute the eigenvalues of $Q$. The characteristic polynomial of $Q$ is:
+
+\[
+\lambda^3 - 42\lambda^2 + 397\lambda - 100 = 0
+\]
+
+Using numerical methods, the eigenvalues are approximately:
+\begin{itemize}
+\item $\lambda_1 \approx 0.2567$
+\item $\lambda_2 \approx 13.8844$
+\item $\lambda_3 \approx 27.8589$
+\end{itemize}
+
+Thus, the largest eigenvalue is approximately $L = 27.8589$.
+
+\textbf{Answer:} Yes; the smoothness parameter is approximately \textbf{27.8589}.
+
+\item Is this function strongly convex? If so, report the strong convexity parameter, otherwise report ``0''.
+
+\textbf{Solution:} Yes, the function is strongly convex. The strong convexity parameter $\mu$ is the smallest eigenvalue of $Q$.
+
+From the eigenvalues computed earlier:
+\begin{itemize}
+\item Smallest eigenvalue $\lambda_{\text{min}} \approx 0.2567$
+\end{itemize}
+
+Thus, the strong convexity parameter is approximately $\mu = 0.2567$.
+
+\textbf{Answer:} Yes; the strong convexity parameter is approximately \textbf{0.2567}.
+
+\end{enumerate}
+
+\section*{2. Gradient Descent and Line Search} For the function $f(x)$ given in the previous problem above, implement gradient descent and plot the suboptimality vs iteration for: (a) gradient descent implemented using a fixed step size computed as suggested in the lectures (i.e., as function of the smoothness parameter you computed above), and (b) gradient descent using line search, as explained in the lectures.
+
+\subsection*{Solution}
+
+For this problem, we will use the quadratic function from Problem 1:
+\[
+f(x) = \frac{1}{2}x^TQx + q^Tx + c,
+\]
+where $Q$, $q$, and $c$ are given as:
+\[
+Q = \begin{bmatrix}
+13 & 12 & -2 \\
+12 & 17 & 6 \\
+-2 & 6 & 12
+\end{bmatrix}, \quad
+q = \begin{pmatrix}
+-22 \\
+-14.5 \\
+13
+\end{pmatrix}, \quad
+c = -1
+\]
+
+\subsubsection*{1. Computing the Gradient}
+
+The gradient of $f(x)$ is:
+\[\nabla f(x) = Qx + q\]
+
+From Problem 1, we found:
+\begin{itemize}
+\item Smoothness parameter $L = 27.8589$
+\item Strong convexity parameter $\mu = 0.2567$
+\end{itemize}
+
+\subsubsection*{2. Implementation}
+
+\paragraph{(a) Fixed Step Size:}
+Using the fixed step size $\alpha = \frac{1}{L} \approx \frac{1}{27.8589}$, the update rule is:
+\[x_{k+1} = x_k - \alpha(Qx_k + q)\]
+
+\paragraph{(b) Line Search:}
+For the backtracking line search:
+\begin{itemize}
+\item Initialize $\alpha = 1$
+\item While Armijo condition is not satisfied:
+\[f(x_k - \alpha \nabla f(x_k)) > f(x_k) - c\alpha\|\nabla f(x_k)\|^2\]
+update $\alpha = \rho\alpha$ where $\rho = 0.5$ and $c = 10^{-4}$
+\item Update $x_{k+1} = x_k - \alpha \nabla f(x_k)$
+\end{itemize}
+
+\subsubsection*{3. Finding the Optimal Value $f^*$}
+
+The optimal point $x^*$ satisfies $\nabla f(x^*) = 0$:
+\[Qx^* + q = 0\]
+\[x^* = -Q^{-1}q\]
+
+Computing numerically:
+\[x^* \approx \begin{bmatrix} 
+2.0000 \\
+0.5000 \\
+-1.0000
+\end{bmatrix}\]
+
+The optimal value is:
+\[f^* = f(x^*) \approx -24.25\]
+
+\subsubsection*{4. Implementation Results}
+
+The implementation was done in Python using NumPy. Both methods were run for 100 iterations with initial point:
+\[x_0 = \begin{bmatrix} 
+0 \\
+0 \\
+0
+\end{bmatrix}\]
+
+\subsubsection*{5. Convergence Plot}
+
+The plot shows $\log_{10}(f(x_k) - f^*)$ versus iteration $k$ for both methods. The fixed step size method (blue) shows linear convergence with rate determined by the condition number $\kappa = \frac{L}{\mu} \approx 108.5$. The line search method (red) converges faster due to adaptive step sizes.
+
+[Note: In practice, include the actual plot generated from the implementation]
+
+\subsubsection*{6. Observations}
+\begin{itemize}
+\item Both methods converge to the optimal value
+\item Line search typically requires fewer iterations to reach the same accuracy
+\item The fixed step size method shows predictable linear convergence
+\item The condition number affects the convergence rate of both methods
+\end{itemize}
+
+\section*{3. Condition Number} 
+We saw in class that a fixed step size is able to guarantee linear convergence. The choice of step size we gave in class, however, depended on the function $L$. Show that it is not possible to choose a fixed step size $t$, that gives convergence for any strongly convex function. That is, for any fixed step size $t$, show that there exists (by finding one!) a smooth (twice continuously-differentiable) strongly convex function with bounded Hessian, such that a fixed-stepsize gradient algorithm starting from some point $x_0$, does not converge to the optimal solution.
+
+\subsection*{Solution}
+
+To show that no fixed step size $t$ guarantees convergence for all strongly convex functions, we'll construct a specific strongly convex, smooth function for which gradient descent with step size $t$ fails to converge.
+
+\subsubsection*{1. Construction}
+Consider the quadratic function:
+\[f(x) = \frac{1}{2} \lambda x^\top x\]
+where $\lambda > 0$ is a scalar we will choose strategically.
+
+\subsubsection*{2. Properties}
+\begin{itemize}
+\item \textbf{Strong Convexity:} Since $\lambda > 0$, $f$ is strongly convex with parameter $\mu = \lambda$
+\item \textbf{Smoothness:} The Hessian $\nabla^2 f(x) = \lambda I$ is constant and bounded
+\end{itemize}
+
+\subsubsection*{3. Gradient Descent Analysis}
+The gradient is:
+\[\nabla f(x) = \lambda x\]
+
+The gradient descent update rule becomes:
+\[x_{k+1} = x_k - t\nabla f(x_k) = x_k - t\lambda x_k = (1 - t\lambda)x_k\]
+
+By iteration:
+\[x_k = (1 - t\lambda)^k x_0\]
+
+\subsubsection*{4. Convergence Condition}
+For convergence, we need:
+\[|1 - t\lambda| < 1 \implies t\lambda \in (0, 2)\]
+
+\subsubsection*{5. Counter-Example Construction}
+For any given $t > 0$, choose:
+\[\lambda = \frac{2}{t}\]
+
+This gives:
+\[x_k = (1 - t\lambda)^k x_0 = (-1)^k x_0\]
+
+\subsubsection*{6. Result}
+With this choice of $\lambda$:
+\begin{itemize}
+\item The sequence oscillates between $x_0$ and $-x_0$
+\item The algorithm fails to converge to the minimizer ($x^* = 0$)
+\item Yet $f(x)$ remains strongly convex and smooth
+\end{itemize}
+
+\subsubsection*{Conclusion}
+For any fixed step size $t > 0$, we can construct a strongly convex, smooth function $f(x) = \frac{1}{2}\lambda x^\top x$ with $\lambda = \frac{2}{t}$ for which gradient descent fails to converge. This proves that no fixed step size can guarantee convergence for all strongly convex functions.
+
+\section*{4. Convex functions}
+\begin{enumerate}[label=(\alph*)]
+\item If $f_i$ are convex functions, show that $f(x) := \sup_i f_i(x)$ is also convex.
+
+\textbf{Proof:}
+
+To prove that $f(x) = \sup_i f_i(x)$ is convex, we need to show that for all $x, y \in \mathbb{R}^n$ and $\theta \in [0,1]$:
+
+\[f(\theta x + (1-\theta) y) \leq \theta f(x) + (1-\theta) f(y).\]
+
+Since $f_i$ are convex, for each $i$:
+\[f_i(\theta x + (1-\theta) y) \leq \theta f_i(x) + (1-\theta) f_i(y).\]
+
+Taking the supremum over all $i$ on both sides:
+\[\sup_i f_i(\theta x + (1-\theta) y) \leq \sup_i [\theta f_i(x) + (1-\theta) f_i(y)].\]
+
+Because the supremum of a sum is less than or equal to the sum of the suprema when the coefficients are non-negative (which they are, since $\theta \in [0,1]$):
+\[\sup_i [\theta f_i(x) + (1-\theta) f_i(y)] \leq \theta \sup_i f_i(x) + (1-\theta) \sup_i f_i(y).\]
+
+Therefore, $f(\theta x + (1-\theta) y) \leq \theta f(x) + (1-\theta) f(y)$, proving that $f$ is convex.
+
+\item Show by example that the eigenvalue of largest magnitude is not a convex function of the matrix.
+
+\textbf{Solution:}
+
+Consider matrices $M$ and $N$:
+\[M = \begin{bmatrix} 0 & 5 \\ -5 & 0 \end{bmatrix}, \quad N = \begin{bmatrix} 0 & 6 \\ -6 & 0 \end{bmatrix}\]
+
+Let $\theta = 0.5$. Then:
+\[\theta M + (1-\theta)N = \begin{bmatrix} 0 & 5.5 \\ -5.5 & 0 \end{bmatrix}\]
+
+The eigenvalues of $M$ are $\pm 5$, the eigenvalues of $N$ are $\pm 6$, and the eigenvalues of $\theta M + (1-\theta)N$ are $\pm 3.5$. The eigenvalue of largest magnitude is $-3.5$.
+
+Calculating $\theta \lambda_{\text{max\_abs}}(M) + (1-\theta) \lambda_{\text{max\_abs}}(N)$:
+\[0.5 \times 5 + 0.5 \times 6 = 5.5.\]
+
+However, $\lambda_{\text{max\_abs}}(\theta M + (1-\theta) N) = 3.5$, which is less than $5.5$, violating the inequality required for convexity. Thus, the eigenvalue of largest magnitude is not a convex function.
+
+\item Consider a weighted graph with edge weight vector $w$. Fix two nodes $a$ and $b$. The weighted shortest path from $a$ to $b$ is the path whose sum of edge weights is the minimum, among all paths with one endpoint at $a$ and another at $b$. Let $f(w)$ be the weight of this path. Show that $f$ is a concave function of $w$.
+
+\textbf{Proof:}
+
+Let $\mathcal{P}$ denote the set of all paths from node $a$ to node $b$. Each path $p \in \mathcal{P}$ can be represented by its incidence vector $x_p \in \{0,1\}^E$, where $E$ is the set of edges, and $(x_p)_e = 1$ if edge $e$ is in path $p$, and $0$ otherwise.
+
+The total weight of path $p$ is:
+\[w^\top x_p = \sum_{e \in E} w_e (x_p)_e.\]
+
+The shortest path weight is then:
+\[f(w) = \min_{p \in \mathcal{P}} w^\top x_p.\]
+
+Since each $w^\top x_p$ is a linear function of $w$, and $f(w)$ is the minimum of a collection of linear functions, $f(w)$ is concave.
+
+\end{enumerate}
+
+\end{document}

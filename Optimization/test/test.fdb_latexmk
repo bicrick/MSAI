@@ -1,0 +1,24 @@
+# Fdb version 4
+["pdflatex"] 1732077533.70397 "/Users/b407404/Desktop/Misc/MSAI/Optimization/test/test.tex" "test.pdf" "test" 1732077533.82383 0
+  "/Users/b407404/Desktop/Misc/MSAI/Optimization/test/test.tex" 1732077533.50306 334 25b00c17a258ff4adee590973e75d89c ""
+  "/Users/b407404/Library/texlive/2024basic/texmf-var/fonts/pk/ljfour/jknappen/ec/tcrm1000.600pk" 1725484761.2029 11524 91027ba1c220320eafa0fc4efb7bcfdc ""
+  "/usr/local/texlive/2024basic/texmf-dist/fonts/tfm/jknappen/ec/tcrm1000.tfm" 1136768653 1536 e07581a4bb3136ece9eeb4c3ffab8233 ""
+  "/usr/local/texlive/2024basic/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb" 1248133631 36299 5f9df58c2139e7edcf37c8fca4bd384d ""
+  "/usr/local/texlive/2024basic/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb" 1248133631 35752 024fb6c41858982481f6968b5fc26508 ""
+  "/usr/local/texlive/2024basic/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb" 1248133631 32762 224316ccc9ad3ca0423a14971cfa7fc1 ""
+  "/usr/local/texlive/2024basic/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb" 1248133631 32569 5e5ddc8df908dea60932f3c484a54c0d ""
+  "/usr/local/texlive/2024basic/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb" 1248133631 32716 08e384dc442464e7285e891af9f45947 ""
+  "/usr/local/texlive/2024basic/texmf-dist/tex/latex/base/article.cls" 1717359999 20144 67a5f8e0f9e445e8ec6834e595cebdc9 ""
+  "/usr/local/texlive/2024basic/texmf-dist/tex/latex/base/size10.clo" 1717359999 8448 358bf3de18513f057a13bdc6e6770c41 ""
+  "/usr/local/texlive/2024basic/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def" 1716410060 29785 9f93ab201fe5dd053afcc6c1bcf7d266 ""
+  "/usr/local/texlive/2024basic/texmf-dist/web2c/texmf.cnf" 1719785820 42007 0b741a3c21a5ca32b40e3846e75b3548 ""
+  "/usr/local/texlive/2024basic/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1725484170 79187 3707ba1a1c2304ab6bb6cb291e5e6f79 ""
+  "/usr/local/texlive/2024basic/texmf-var/web2c/pdftex/pdflatex.fmt" 1725484211 7553976 a02f72d30e53774feece7abddabccb1d ""
+  "/usr/local/texlive/2024basic/texmf.cnf" 1710011638 628 8b896f7d9d41b43f4346b9091e52171f ""
+  "test.aux" 1732077533.80592 32 3985256e7290058c681f74d7a3565a19 "pdflatex"
+  "test.tex" 1732077533.50306 334 25b00c17a258ff4adee590973e75d89c ""
+  (generated)
+  "test.aux"
+  "test.log"
+  "test.pdf"
+  (rewritten before read)
