@@ -4,6 +4,7 @@ This repository contains coursework and assignments for the Master of Science in
 
 ## Repository Structure
 
+```
 .
 ├── Machine Learning/
 │   ├── hw0/
@@ -23,6 +24,7 @@ This repository contains coursework and assignments for the Master of Science in
     ├── hw7/
     ├── hw8/
     └── hw9/
+```
 
 ## Course Content
 
@@ -39,14 +41,7 @@ This repository contains coursework and assignments for the Master of Science in
 ## Technical Details
 
 ### LaTeX Setup
-The Optimization homework assignments use a consistent LaTeX setup with the following packages:
-- article class with standard formatting
-- amsmath, amsfonts, and amssymb for mathematical notation
-- geometry for page layout
-- graphicx for including figures
-- listings for code blocks
-- enumitem for lists
-- fancyhdr for header/footer customization
+Standard LaTeX setup with common mathematical and scientific packages for typesetting proofs and equations.
 
 ### Python Environment
 The Machine Learning assignments use:
@@ -54,30 +49,10 @@ The Machine Learning assignments use:
 - Jupyter Notebooks
 - Common data science libraries (based on notebook content)
 
-## Usage
+## Important Notice
 
-1. Clone the repository
-2. For LaTeX documents:
-   - Ensure you have a LaTeX distribution installed (e.g., TeX Live 2024)
-   - Compile using pdflatex or your preferred LaTeX compiler
-3. For Python notebooks:
-   - Install required Python packages
-   - Run using Jupyter Notebook/Lab
-
-## Note
-
-This repository is for personal educational use. Please do not copy or distribute the contents without permission.
-
-## Gitignore
-
-The repository ignores the following files:
-
-.DS_Store
-__pycache__/
-**/__pycache__/
-*.py[cod]
-**/*.py[cod]
+This repository serves as a portfolio of my academic work and technical skills. It is intended for reference and demonstration purposes only. The content represents my personal coursework and solutions. Please do not copy, distribute, or submit any part of this work as your own.
 
 ## License
 
-All rights reserved. This material is for personal educational use only.
+All rights reserved. This material is for portfolio demonstration purposes only.
