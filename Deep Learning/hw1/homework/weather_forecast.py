@@ -21,7 +21,10 @@ class WeatherForecast:
             min_per_day: tensor of size (num_days,)
             max_per_day: tensor of size (num_days,)
         """
-        raise NotImplementedError
+        # Find min and max along dimension 1 (measurements within each day)
+        min_per_day = torch.min(self.data, dim=1).values
+        max_per_day = torch.max(self.data, dim=1).values
+        return min_per_day, max_per_day
 
     def find_the_largest_drop(self) -> torch.Tensor:
         """
@@ -31,16 +34,26 @@ class WeatherForecast:
         Returns:
             tensor of a single value, the difference in temperature
         """
-        raise NotImplementedError
+        # Calculate daily averages
+        daily_avgs = torch.mean(self.data, dim=1)
+        # Calculate day-over-day differences
+        temp_changes = daily_avgs[1:] - daily_avgs[:-1]
+        # Find the largest negative change (minimum value)
+        return torch.min(temp_changes)
 
     def find_the_most_extreme_day(self) -> torch.Tensor:
         """
-        For each day, find the measurement that differs the most from the day's average temperature
-
-        Returns:
-            tensor with size (num_days,)
+        For each day, find the measurement that differs the most from the day's average temperature.
         """
-        raise NotImplementedError
+        # Calculate daily averages (keeping dims for broadcasting)
+        daily_avgs = torch.mean(self.data, dim=1, keepdim=True)
+        # Compute absolute differences between each measurement and the day's average
+        differences = torch.abs(self.data - daily_avgs)
+        # For each day, find the index of the measurement with the maximum difference
+        indices = torch.argmax(differences, dim=1)
+        # Gather the corresponding measurements using the found indices
+        most_extreme_measurements = torch.gather(self.data, 1, indices.unsqueeze(1)).squeeze(1)
+        return most_extreme_measurements
 
     def max_last_k_days(self, k: int) -> torch.Tensor:
         """
@@ -49,7 +62,10 @@ class WeatherForecast:
         Returns:
             tensor of size (k,)
         """
-        raise NotImplementedError
+        # Get last k days of data
+        last_k_data = self.data[-k:]
+        # Find max temperature for each day
+        return torch.max(last_k_data, dim=1).values
 
     def predict_temperature(self, k: int) -> torch.Tensor:
         """
@@ -62,29 +78,23 @@ class WeatherForecast:
         Returns:
             tensor of a single value, the predicted temperature
         """
-        raise NotImplementedError
+        # Get last k days of data
+        last_k_data = self.data[-k:]
+        # Calculate average of all measurements over last k days
+        return torch.mean(last_k_data)
 
     def what_day_is_this_from(self, t: torch.FloatTensor) -> torch.LongTensor:
         """
-        You go on a stroll next to the weather station, where this data was collected.
-        You find a phone with severe water damage.
-        The only thing that you can see in the screen are the
-        temperature reading of one full day, right before it broke.
-
-        You want to figure out what day it broke.
-
-        The dataset we have starts from Monday.
-        Given a list of 10 temperature measurements, find the day in a week
-        that the temperature is most likely measured on.
-
-        We measure the difference using 'sum of absolute difference
-        per measurement':
-            d = |x1-t1| + |x2-t2| + ... + |x10-t10|
-
-        Args:
-            t: tensor of size (10,), temperature measurements
-
-        Returns:
-            tensor of a single value, the index of the closest data element
+        Find which day in the dataset most closely matches the input measurements
         """
-        raise NotImplementedError
+        # Ensure input tensor has shape [10] and data has shape [num_days, 10]
+        if t.dim() == 1:
+            t = t.view(1, -1)  # reshape to [1, 10]
+        
+        # Calculate absolute differences between input and all days
+        differences = torch.abs(self.data - t)
+        # Sum differences for each day to get total difference per day
+        total_differences = torch.sum(differences, dim=1)
+        # Find day with minimum total difference
+        closest_day = torch.argmin(total_differences)
+        return closest_day
