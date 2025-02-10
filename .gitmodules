@@ -1,0 +1,3 @@
+[submodule "Automated Logical Reasoning/pa01"]
+	path = Automated Logical Reasoning/pa01
+	url = https://github.com/cs389l-web/pa1-cdcl-bicrick.git
