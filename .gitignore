@@ -25,6 +25,16 @@ var/
 .installed.cfg
 *.egg
 
+# Deep Learning homework data
+Deep Learning/hw2/classification_data/
+Deep Learning/hw2/logs/
+**/logs/
+**/events.out.tfevents*
+
+# Model files and images
+*.th
+*.png
+
 # Jupyter Notebook
 .ipynb_checkpoints
 */.ipynb_checkpoints/*
