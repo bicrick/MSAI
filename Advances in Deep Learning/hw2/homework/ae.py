@@ -114,67 +114,50 @@ class PatchAutoEncoder(torch.nn.Module, PatchAutoEncoderBase):
 
         def __init__(self, patch_size: int, latent_dim: int, bottleneck: int):
             super().__init__()
-            # Patchify and encode
+            # Create the encoder architecture
             self.patchify = PatchifyLinear(patch_size, latent_dim)
             
-            # Add a convolutional layer to allow interactions between patches
-            # Use same padding to keep dimensions unchanged
-            self.conv = torch.nn.Conv2d(latent_dim, bottleneck, kernel_size=3, padding=1)
-            
-            # Non-linearity
-            self.gelu = torch.nn.GELU()
+            # Add a small convolutional network to process the patches
+            self.process = torch.nn.Sequential(
+                torch.nn.Conv2d(latent_dim, latent_dim, kernel_size=3, padding=1),
+                torch.nn.GELU(),
+                torch.nn.Conv2d(latent_dim, bottleneck, kernel_size=1)
+            )
 
         def forward(self, x: torch.Tensor) -> torch.Tensor:
-            # x: (B, H, W, 3)
-            # Patchify to (B, h, w, latent_dim)
-            x = self.patchify(x)
+            # First patchify the input
+            patches = self.patchify(x)
             
-            # Convert to channel-first for conv
-            x = hwc_to_chw(x)
+            # Process the patches with convolutions
+            # Convert from [B, h, w, C] to [B, C, h, w] for convolutions
+            patches_chw = hwc_to_chw(patches)
+            processed = self.process(patches_chw)
             
-            # Apply conv to allow interactions between patches
-            x = self.conv(x)
-            
-            # Apply non-linearity
-            x = self.gelu(x)
-            
-            # Convert back to channel-last
-            x = chw_to_hwc(x)
-            
-            return x
+            # Convert back to [B, h, w, C] format
+            return chw_to_hwc(processed)
 
     class PatchDecoder(torch.nn.Module):
         def __init__(self, patch_size: int, latent_dim: int, bottleneck: int):
             super().__init__()
-            # Add a convolutional layer to allow interactions between patches
-            # Use same padding to keep dimensions unchanged
-            self.conv = torch.nn.Conv2d(bottleneck, latent_dim, kernel_size=3, padding=1)
+            # Create the decoder architecture
+            self.process = torch.nn.Sequential(
+                torch.nn.Conv2d(bottleneck, latent_dim, kernel_size=1),
+                torch.nn.GELU(),
+                torch.nn.Conv2d(latent_dim, latent_dim, kernel_size=3, padding=1),
+                torch.nn.GELU(),
+            )
             
-            # Non-linearity
-            self.gelu = torch.nn.GELU()
-            
-            # Unpatchify and decode
             self.unpatchify = UnpatchifyLinear(patch_size, latent_dim)
 
         def forward(self, x: torch.Tensor) -> torch.Tensor:
-            # x: (B, h, w, bottleneck)
+            # Process the bottleneck representation
+            # Convert from [B, h, w, C] to [B, C, h, w] for convolutions
+            patches_chw = hwc_to_chw(x)
+            processed = self.process(patches_chw)
             
-            # Convert to channel-first for conv
-            x = hwc_to_chw(x)
-            
-            # Apply conv to allow interactions between patches
-            x = self.conv(x)
-            
-            # Apply non-linearity
-            x = self.gelu(x)
-            
-            # Convert back to channel-last
-            x = chw_to_hwc(x)
-            
-            # Unpatchify to (B, H, W, 3)
-            x = self.unpatchify(x)
-            
-            return x
+            # Convert back to [B, h, w, C] format and unpatchify
+            patches_hwc = chw_to_hwc(processed)
+            return self.unpatchify(patches_hwc)
 
     def __init__(self, patch_size: int = 25, latent_dim: int = 128, bottleneck: int = 128):
         super().__init__()
@@ -182,7 +165,7 @@ class PatchAutoEncoder(torch.nn.Module, PatchAutoEncoderBase):
         self.latent_dim = latent_dim
         self.bottleneck = bottleneck
         
-        # Create encoder and decoder
+        # Create the encoder and decoder
         self.encoder = self.PatchEncoder(patch_size, latent_dim, bottleneck)
         self.decoder = self.PatchDecoder(patch_size, latent_dim, bottleneck)
 
@@ -198,7 +181,7 @@ class PatchAutoEncoder(torch.nn.Module, PatchAutoEncoderBase):
         # Decode the encoded representation
         decoded = self.decode(encoded)
         
-        # No additional loss terms for this basic implementation
+        # No additional loss terms for the basic auto-encoder
         additional_losses = {}
         
         return decoded, additional_losses
