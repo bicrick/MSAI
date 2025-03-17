@@ -41,6 +41,7 @@ Advances in Deep Learning/hw2/data/
 *.jpeg
 *.zip
 *.json
+*.pth
 
 # Jupyter Notebook
 .ipynb_checkpoints
