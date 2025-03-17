@@ -31,9 +31,16 @@ Deep Learning/hw2/logs/
 **/logs/
 **/events.out.tfevents*
 
+# Advances in Deep Learning homework data
+Advances in Deep Learning/hw2/data/
+
 # Model files and images
 *.th
 *.png
+*.jpg
+*.jpeg
+*.zip
+*.json
 
 # Jupyter Notebook
 .ipynb_checkpoints
