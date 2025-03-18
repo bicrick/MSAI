@@ -49,11 +49,9 @@ class BSQ(torch.nn.Module):
         self._codebook_bits = codebook_bits
         self._embedding_dim = embedding_dim
         
-        # Down projection to codebook_bits dimensions
-        self.down_proj = torch.nn.Linear(embedding_dim, codebook_bits, bias=False)
-        
-        # Up projection back to embedding_dim
-        self.up_proj = torch.nn.Linear(codebook_bits, embedding_dim, bias=False)
+        # Linear projections for encoding and decoding
+        self.proj_down = torch.nn.Linear(embedding_dim, codebook_bits, bias=False)
+        self.proj_up = torch.nn.Linear(codebook_bits, embedding_dim, bias=False)
 
     def encode(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -62,22 +60,21 @@ class BSQ(torch.nn.Module):
         - L2 normalization
         - differentiable sign
         """
-        # Down projection
-        proj = self.down_proj(x)
+        # Project down to codebook_bits dimensions
+        x = self.proj_down(x)
         
-        # L2 normalization
-        norm = torch.nn.functional.normalize(proj, p=2, dim=-1)
+        # L2 normalization (normalize along the last dimension)
+        x_norm = torch.nn.functional.normalize(x, p=2, dim=-1)
         
-        # Differentiable sign
-        return diff_sign(norm)
+        # Apply differentiable sign
+        return diff_sign(x_norm)
 
     def decode(self, x: torch.Tensor) -> torch.Tensor:
         """
         Implement the BSQ decoder:
         - A linear up-projection into embedding_dim should suffice
         """
-        # Up projection
-        return self.up_proj(x)
+        return self.proj_up(x)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.decode(self.encode(x))
@@ -96,11 +93,9 @@ class BSQ(torch.nn.Module):
 
     def _code_to_index(self, x: torch.Tensor) -> torch.Tensor:
         x = (x >= 0).int()
-        # Use exponentiation instead of bit shifting for Apple Silicon compatibility
         return (x * (2 ** torch.arange(x.size(-1), device=x.device))).sum(dim=-1)
 
     def _index_to_code(self, x: torch.Tensor) -> torch.Tensor:
-        # Use exponentiation instead of bit shifting for Apple Silicon compatibility
         return 2 * ((x[..., None] & (2 ** torch.arange(self._codebook_bits, device=x.device))) > 0).float() - 1
 
 
@@ -116,48 +111,32 @@ class BSQPatchAutoEncoder(PatchAutoEncoder, Tokenizer):
         super().__init__(patch_size=patch_size, latent_dim=latent_dim)
         self.codebook_bits = codebook_bits
         
-        # Create the BSQ module for quantization
-        self.bsq = BSQ(codebook_bits=codebook_bits, embedding_dim=self.bottleneck)
+        # Initialize the BSQ module
+        self.bsq = BSQ(codebook_bits=codebook_bits, embedding_dim=latent_dim)
 
     def encode_index(self, x: torch.Tensor) -> torch.Tensor:
-        """
-        Encode an image to indices using the patch encoder and BSQ
-        """
-        # First encode with the patch encoder
-        patches = super().encode(x)
-        
-        # Then encode to indices with BSQ
-        return self.bsq.encode_index(patches)
+        # First use the encoder from PatchAutoEncoder to get latent representation
+        z = super().encode(x)
+        # Then use BSQ to encode to indices
+        return self.bsq.encode_index(z)
 
     def decode_index(self, x: torch.Tensor) -> torch.Tensor:
-        """
-        Decode indices to an image using BSQ and the patch decoder
-        """
-        # First decode indices to patch embeddings with BSQ
-        patches = self.bsq.decode_index(x)
-        
-        # Then decode to image with the patch decoder
-        return super().decode(patches)
+        # First use BSQ to decode indices to latent representation
+        z = self.bsq.decode_index(x)
+        # Then use the decoder from PatchAutoEncoder to reconstruct the image
+        return super().decode(z)
 
     def encode(self, x: torch.Tensor) -> torch.Tensor:
-        """
-        Encode an image to binary codes using the patch encoder and BSQ
-        """
-        # First encode with the patch encoder
-        patches = super().encode(x)
-        
-        # Then encode to binary codes with BSQ
-        return self.bsq.encode(patches)
+        # First encode with parent encoder
+        z = super().encode(x)
+        # Then apply BSQ encoding
+        return self.bsq.encode(z)
 
     def decode(self, x: torch.Tensor) -> torch.Tensor:
-        """
-        Decode binary codes to an image using BSQ and the patch decoder
-        """
-        # First decode binary codes to patch embeddings with BSQ
-        patches = self.bsq.decode(x)
-        
-        # Then decode to image with the patch decoder
-        return super().decode(patches)
+        # Decode with BSQ first
+        z = self.bsq.decode(x)
+        # Then decode with parent decoder
+        return super().decode(z)
 
     def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, dict[str, torch.Tensor]]:
         """
@@ -175,32 +154,30 @@ class BSQPatchAutoEncoder(PatchAutoEncoder, Tokenizer):
                 ...
               }
         """
-        # Encode with both patch encoder and BSQ
-        encoded = self.encode(x)
+        # Get encoded representation
+        z = super().encode(x)
         
-        # Decode with both BSQ and patch decoder
-        decoded = self.decode(encoded)
+        # Apply BSQ
+        z_bsq = self.bsq.encode(z)
         
-        # Monitor codebook usage as suggested
-        indices = self.encode_index(x)
-        device = indices.device
+        # Decode
+        decoded_z = self.bsq.decode(z_bsq)
+        x_hat = super().decode(decoded_z)
         
-        try:
-            # Count the occurrences of each index
+        # Additional tracking metrics
+        with torch.no_grad():
+            # Get indices
+            indices = self.bsq.encode_index(z)
+            
+            # Calculate codebook usage statistics
             cnt = torch.bincount(indices.flatten(), minlength=2**self.codebook_bits)
             
-            # Calculate the statistics
-            additional_losses = {
-                "cb0": (cnt == 0).float().mean().detach(),  # Percentage of unused codes
-                "cb2": (cnt <= 2).float().mean().detach(),  # Percentage of rarely used codes (≤ 2 occurrences)
-                "cb10": (cnt <= 10).float().mean().detach(),  # Percentage of codes with ≤ 10 occurrences
-                "cb_max": cnt.max().float().detach(),  # Maximum occurrences of any code
-                "cb_entropy": (-torch.log2(cnt.float() / cnt.sum() + 1e-10) * (cnt.float() / cnt.sum())).sum().detach(),  # Entropy
-            }
-        except Exception as e:
-            # In case of any issues (e.g., with Apple Silicon), just return basic stats
-            additional_losses = {
-                "error": torch.tensor(0.0, device=device)
+            # Track unused and rarely used tokens
+            stats = {
+                "cb0": (cnt == 0).float().mean().detach(),  # Percentage of unused tokens
+                "cb2": (cnt <= 2).float().mean().detach(),  # Percentage of tokens used ≤ 2 times
+                "cb10": (cnt <= 10).float().mean().detach(), # Percentage of tokens used ≤ 10 times
+                "diversity": (cnt > 0).float().sum().detach() / (2**self.codebook_bits), # Token diversity
             }
         
-        return decoded, additional_losses
+        return x_hat, stats
