@@ -114,13 +114,20 @@ class PatchAutoEncoder(torch.nn.Module, PatchAutoEncoderBase):
 
         def __init__(self, patch_size: int, latent_dim: int, bottleneck: int):
             super().__init__()
-            # Create the encoder architecture
+            # First use linear patchify as recommended in the forum
             self.patchify = PatchifyLinear(patch_size, latent_dim)
             
-            # Add a small convolutional network to process the patches
+            # Then add convolutional layers with GELU activations
             self.process = torch.nn.Sequential(
+                # First layer - process features with convolution
                 torch.nn.Conv2d(latent_dim, latent_dim, kernel_size=3, padding=1),
                 torch.nn.GELU(),
+                
+                # Second layer - another convolution
+                torch.nn.Conv2d(latent_dim, latent_dim, kernel_size=3, padding=1),
+                torch.nn.GELU(),
+                
+                # Final projection to bottleneck dimension
                 torch.nn.Conv2d(latent_dim, bottleneck, kernel_size=1)
             )
 
@@ -139,10 +146,17 @@ class PatchAutoEncoder(torch.nn.Module, PatchAutoEncoderBase):
     class PatchDecoder(torch.nn.Module):
         def __init__(self, patch_size: int, latent_dim: int, bottleneck: int):
             super().__init__()
-            # Create the decoder architecture
+            # Create the decoder architecture with mirrored structure
             self.process = torch.nn.Sequential(
+                # Initial projection from bottleneck
                 torch.nn.Conv2d(bottleneck, latent_dim, kernel_size=1),
                 torch.nn.GELU(),
+                
+                # First convolutional layer
+                torch.nn.Conv2d(latent_dim, latent_dim, kernel_size=3, padding=1),
+                torch.nn.GELU(),
+                
+                # Second convolutional layer
                 torch.nn.Conv2d(latent_dim, latent_dim, kernel_size=3, padding=1),
                 torch.nn.GELU(),
             )
@@ -159,7 +173,7 @@ class PatchAutoEncoder(torch.nn.Module, PatchAutoEncoderBase):
             patches_hwc = chw_to_hwc(processed)
             return self.unpatchify(patches_hwc)
 
-    def __init__(self, patch_size: int = 25, latent_dim: int = 128, bottleneck: int = 128):
+    def __init__(self, patch_size: int = 5, latent_dim: int = 128, bottleneck: int = 128):
         super().__init__()
         self.patch_size = patch_size
         self.latent_dim = latent_dim
