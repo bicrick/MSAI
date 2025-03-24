@@ -121,8 +121,115 @@ class Detector(torch.nn.Module):
         self.register_buffer("input_mean", torch.as_tensor(INPUT_MEAN))
         self.register_buffer("input_std", torch.as_tensor(INPUT_STD))
 
-        # TODO: implement
-        pass
+        # Number of filters in each layer
+        filters = [16, 32, 64, 128, 256]
+        
+        # Encoder (downsampling) blocks
+        # 1st encoder block
+        self.enc1 = nn.Sequential(
+            nn.Conv2d(in_channels, filters[0], kernel_size=3, padding=1),
+            nn.BatchNorm2d(filters[0]),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(filters[0], filters[0], kernel_size=3, padding=1),
+            nn.BatchNorm2d(filters[0]),
+            nn.ReLU(inplace=True)
+        )
+        self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)
+        
+        # 2nd encoder block
+        self.enc2 = nn.Sequential(
+            nn.Conv2d(filters[0], filters[1], kernel_size=3, padding=1),
+            nn.BatchNorm2d(filters[1]),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(filters[1], filters[1], kernel_size=3, padding=1),
+            nn.BatchNorm2d(filters[1]),
+            nn.ReLU(inplace=True)
+        )
+        self.pool2 = nn.MaxPool2d(kernel_size=2, stride=2)
+        
+        # 3rd encoder block
+        self.enc3 = nn.Sequential(
+            nn.Conv2d(filters[1], filters[2], kernel_size=3, padding=1),
+            nn.BatchNorm2d(filters[2]),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(filters[2], filters[2], kernel_size=3, padding=1),
+            nn.BatchNorm2d(filters[2]),
+            nn.ReLU(inplace=True)
+        )
+        self.pool3 = nn.MaxPool2d(kernel_size=2, stride=2)
+        
+        # 4th encoder block
+        self.enc4 = nn.Sequential(
+            nn.Conv2d(filters[2], filters[3], kernel_size=3, padding=1),
+            nn.BatchNorm2d(filters[3]),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(filters[3], filters[3], kernel_size=3, padding=1),
+            nn.BatchNorm2d(filters[3]),
+            nn.ReLU(inplace=True)
+        )
+        self.pool4 = nn.MaxPool2d(kernel_size=2, stride=2)
+        
+        # Bridge
+        self.bridge = nn.Sequential(
+            nn.Conv2d(filters[3], filters[4], kernel_size=3, padding=1),
+            nn.BatchNorm2d(filters[4]),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(filters[4], filters[4], kernel_size=3, padding=1),
+            nn.BatchNorm2d(filters[4]),
+            nn.ReLU(inplace=True)
+        )
+        
+        # Decoder (upsampling) blocks with skip connections
+        # 1st decoder block
+        self.up1 = nn.ConvTranspose2d(filters[4], filters[3], kernel_size=2, stride=2)
+        self.dec1 = nn.Sequential(
+            nn.Conv2d(filters[3] * 2, filters[3], kernel_size=3, padding=1),  # *2 because of skip connection
+            nn.BatchNorm2d(filters[3]),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(filters[3], filters[3], kernel_size=3, padding=1),
+            nn.BatchNorm2d(filters[3]),
+            nn.ReLU(inplace=True)
+        )
+        
+        # 2nd decoder block
+        self.up2 = nn.ConvTranspose2d(filters[3], filters[2], kernel_size=2, stride=2)
+        self.dec2 = nn.Sequential(
+            nn.Conv2d(filters[2] * 2, filters[2], kernel_size=3, padding=1),
+            nn.BatchNorm2d(filters[2]),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(filters[2], filters[2], kernel_size=3, padding=1),
+            nn.BatchNorm2d(filters[2]),
+            nn.ReLU(inplace=True)
+        )
+        
+        # 3rd decoder block
+        self.up3 = nn.ConvTranspose2d(filters[2], filters[1], kernel_size=2, stride=2)
+        self.dec3 = nn.Sequential(
+            nn.Conv2d(filters[1] * 2, filters[1], kernel_size=3, padding=1),
+            nn.BatchNorm2d(filters[1]),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(filters[1], filters[1], kernel_size=3, padding=1),
+            nn.BatchNorm2d(filters[1]),
+            nn.ReLU(inplace=True)
+        )
+        
+        # 4th decoder block
+        self.up4 = nn.ConvTranspose2d(filters[1], filters[0], kernel_size=2, stride=2)
+        self.dec4 = nn.Sequential(
+            nn.Conv2d(filters[0] * 2, filters[0], kernel_size=3, padding=1),
+            nn.BatchNorm2d(filters[0]),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(filters[0], filters[0], kernel_size=3, padding=1),
+            nn.BatchNorm2d(filters[0]),
+            nn.ReLU(inplace=True)
+        )
+        
+        # Final convolutional layers for segmentation and depth
+        self.seg_output = nn.Conv2d(filters[0], num_classes, kernel_size=1)
+        self.depth_output = nn.Sequential(
+            nn.Conv2d(filters[0], 1, kernel_size=1),
+            nn.Sigmoid()  # Ensures depth values are in range [0, 1]
+        )
 
     def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         """
@@ -137,14 +244,47 @@ class Detector(torch.nn.Module):
                 - logits (b, num_classes, h, w)
                 - depth (b, h, w)
         """
-        # optional: normalizes the input
+        # Normalize the input
         z = (x - self.input_mean[None, :, None, None]) / self.input_std[None, :, None, None]
 
-        # TODO: replace with actual forward pass
-        logits = torch.randn(x.size(0), 3, x.size(2), x.size(3))
-        raw_depth = torch.rand(x.size(0), x.size(2), x.size(3))
-
-        return logits, raw_depth
+        # Encoder path with skip connections
+        enc1_out = self.enc1(z)
+        z = self.pool1(enc1_out)
+        
+        enc2_out = self.enc2(z)
+        z = self.pool2(enc2_out)
+        
+        enc3_out = self.enc3(z)
+        z = self.pool3(enc3_out)
+        
+        enc4_out = self.enc4(z)
+        z = self.pool4(enc4_out)
+        
+        # Bridge
+        z = self.bridge(z)
+        
+        # Decoder path with skip connections
+        z = self.up1(z)
+        z = torch.cat([z, enc4_out], dim=1)  # Skip connection
+        z = self.dec1(z)
+        
+        z = self.up2(z)
+        z = torch.cat([z, enc3_out], dim=1)  # Skip connection
+        z = self.dec2(z)
+        
+        z = self.up3(z)
+        z = torch.cat([z, enc2_out], dim=1)  # Skip connection
+        z = self.dec3(z)
+        
+        z = self.up4(z)
+        z = torch.cat([z, enc1_out], dim=1)  # Skip connection
+        z = self.dec4(z)
+        
+        # Generate outputs
+        logits = self.seg_output(z)
+        depth = self.depth_output(z).squeeze(1)  # Convert from (b, 1, h, w) to (b, h, w)
+        
+        return logits, depth
 
     def predict(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         """
@@ -161,10 +301,10 @@ class Detector(torch.nn.Module):
         """
         logits, raw_depth = self(x)
         pred = logits.argmax(dim=1)
-
-        # Optional additional post-processing for depth only if needed
+        
+        # Raw depth is already normalized by the sigmoid in depth_output
         depth = raw_depth
-
+        
         return pred, depth
 
 
@@ -253,5 +393,43 @@ def debug_model(batch_size: int = 1):
     print(f"Output shape: {output.shape}")
 
 
+def debug_detector(batch_size: int = 16):
+    """
+    Test the detector's prediction speed
+    """
+    import time
+    device = torch.device("mps" if torch.backends.mps.is_available() else "cuda" if torch.cuda.is_available() else "cpu")
+    print(f"Using device: {device}")
+    
+    # Create random test data
+    sample_batch = torch.rand(batch_size, 3, 96, 128).to(device)
+    print(f"Input shape: {sample_batch.shape}")
+
+    # Load model
+    model = load_model("detector", in_channels=3, num_classes=3, with_weights=True).to(device)
+    model.eval()
+    
+    # Warm-up run
+    with torch.inference_mode():
+        model.predict(sample_batch)
+    
+    # Time multiple predictions
+    num_runs = 10
+    total_time = 0
+    
+    with torch.inference_mode():
+        for i in range(num_runs):
+            start_time = time.time()
+            pred, depth = model.predict(sample_batch)
+            end_time = time.time()
+            run_time = end_time - start_time
+            total_time += run_time
+            print(f"Run {i+1}: {run_time:.4f}s")
+    
+    print(f"Average prediction time for batch of {batch_size}: {total_time/num_runs:.4f}s")
+    print(f"Prediction output shapes: {pred.shape}, {depth.shape}")
+
+
 if __name__ == "__main__":
-    debug_model()
+    # debug_model()  # Test classifier
+    debug_detector()  # Test detector speed

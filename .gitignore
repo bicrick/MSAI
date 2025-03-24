@@ -42,6 +42,8 @@ Advances in Deep Learning/hw2/data/
 *.zip
 *.json
 *.pth
+*.pt
+*.npz
 
 # Jupyter Notebook
 .ipynb_checkpoints
@@ -63,3 +65,11 @@ Advances in Deep Learning/hw2/data/
 *.swp
 *.swo
 Online Learn-Optimization/ps04/logistic_news.zip
+
+# Checkpoint directories
+checkpoints/
+**/checkpoints/
+
+# Drive data
+drive_data/
+**/drive_data/
